@@ -69,7 +69,7 @@ export default function EnrollButton({ courseId, initialStatus }: EnrollButtonPr
       <button
         onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleEnroll(); }}
         disabled={loading}
-        className="text-sm font-bold tracking-wider uppercase px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 btn-press flex items-center gap-2"
+        className="text-sm font-bold tracking-wider uppercase px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 btn-press flex items-center gap-2"
       >
         {loading ? (
           <>

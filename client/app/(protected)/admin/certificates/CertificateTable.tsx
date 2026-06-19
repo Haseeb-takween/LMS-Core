@@ -84,7 +84,7 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
           <button
             key={f.key}
             onClick={() => fetchFiltered(f.key)}
-            className={`font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase px-4 py-2 rounded-md transition-all duration-150 ${
+            className={`font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase px-4 py-2 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-150 ${
               filter === f.key
                 ? "bg-secondary text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -124,7 +124,7 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
               return (
                 <div
                   key={cert._id}
-                  className="transition-all duration-300 border-b border-border last:border-0"
+                  className="transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 border-b border-border last:border-0"
                   style={{ opacity: isRemoving ? 0 : 1, transform: isRemoving ? "translateX(-8px)" : "none" }}
                 >
                   <div
@@ -153,14 +153,14 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
                           <button
                             onClick={() => handleApprove(cert._id)}
                             disabled={isLoading}
-                            className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-3 py-1.5 rounded-md transition-all disabled:opacity-40 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-sm"
+                            className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-3 py-1.5 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-40 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-sm"
                           >
                             {isLoading ? "…" : "Approve"}
                           </button>
                           <button
                             onClick={() => setExpanded(isExpanded ? null : cert._id)}
                             disabled={isLoading}
-                            className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-3 py-1.5 rounded-md transition-all disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:shadow-sm"
+                            className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-3 py-1.5 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:shadow-sm"
                           >
                             Reject
                           </button>
@@ -189,7 +189,7 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
                       <button
                         onClick={() => handleReject(cert._id)}
                         disabled={isLoading || !reason.trim()}
-                        className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-4 py-2.5 rounded-md transition-all disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/30 hover:bg-destructive/20"
+                        className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-4 py-2.5 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/30 hover:bg-destructive/20"
                       >
                         {isLoading ? "…" : "Confirm Reject"}
                       </button>

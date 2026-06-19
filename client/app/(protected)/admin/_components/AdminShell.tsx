@@ -66,7 +66,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
         <div className="flex items-center border-b border-border" style={{ height: 60 }}>
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="w-[64px] h-full shrink-0 flex items-center justify-center hover:bg-secondary/50 transition-all duration-200 btn-press"
+            className="w-[64px] h-full shrink-0 flex items-center justify-center hover:bg-secondary/50 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 btn-press"
           >
             {expanded ? (
               <PanelLeftClose className="w-5 h-5 text-primary" />
@@ -75,7 +75,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
             )}
           </button>
           <div
-            className="overflow-hidden whitespace-nowrap transition-all duration-200"
+            className="overflow-hidden whitespace-nowrap transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200"
             style={{ opacity: expanded ? 1 : 0, transform: expanded ? "translateX(0)" : "translateX(-8px)" }}
           >
             <p className="font-[family-name:var(--font-syne)] text-base font-extrabold text-foreground tracking-tight">
@@ -105,7 +105,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 bg-primary rounded-r-full shadow-lg shadow-primary/20" style={{ width: 3, height: 20 }} />
                   )}
                   <span
-                    className={`text-xs tracking-widest font-extrabold transition-all duration-200 ${
+                    className={`text-xs tracking-widest font-extrabold transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 ${
                       active ? "text-primary scale-110" : "text-muted-foreground group-hover/nav:text-foreground"
                     }`}
                   >
@@ -119,7 +119,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
                 </div>
 
                 <div
-                  className="flex-1 flex items-center justify-between pr-4 overflow-hidden whitespace-nowrap transition-all duration-200"
+                  className="flex-1 flex items-center justify-between pr-4 overflow-hidden whitespace-nowrap transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200"
                   style={{ opacity: expanded ? 1 : 0, transform: expanded ? "translateX(0)" : "translateX(-8px)" }}
                 >
                   <span
@@ -144,7 +144,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
 
         <div className="py-3">
           <div
-            className="px-4 py-1 overflow-hidden whitespace-nowrap transition-all duration-200"
+            className="px-4 py-1 overflow-hidden whitespace-nowrap transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200"
             style={{ opacity: expanded ? 1 : 0, transform: expanded ? "translateX(0)" : "translateX(-8px)" }}
           >
             <p className="text-sm text-muted-foreground truncate font-semibold">
@@ -153,13 +153,13 @@ export default function AdminShell({ children, user }: AdminShellProps) {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center h-12 w-full hover:bg-destructive/10 transition-all duration-200 group/logout btn-press"
+            className="flex items-center h-12 w-full hover:bg-destructive/10 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 group/logout btn-press"
           >
             <div className="w-[64px] shrink-0 flex items-center justify-center">
               <LogOut className="w-4 h-4 text-destructive group-hover/logout:scale-110 transition-transform duration-200" />
             </div>
             <span
-              className="text-sm tracking-wide uppercase text-destructive whitespace-nowrap font-bold transition-all duration-200"
+              className="text-sm tracking-wide uppercase text-destructive whitespace-nowrap font-bold transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200"
               style={{ opacity: expanded ? 1 : 0, transform: expanded ? "translateX(0)" : "translateX(-8px)" }}
             >
               Sign out

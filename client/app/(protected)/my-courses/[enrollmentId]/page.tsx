@@ -1,7 +1,10 @@
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type Enrollment, type Course, type Session } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type Enrollment, type Course, type Session } from "@/lib/api";
 import Navbar from "../../_components/Navbar";
 import AnimatedBar from "../../_components/AnimatedBar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,41 +14,45 @@ interface SessionRow extends Session {
   quizScore?: { mcScore: number; mcTotal: number } | null;
 }
 
-export default async function MyCourseDetailPage({
-  params,
-}: {
-  params: Promise<{ enrollmentId: string }>;
-}) {
-  const { enrollmentId } = await params;
-  const api = await getServerApi();
+interface PageData {
+  enrollment: Enrollment;
+  sessions: SessionRow[];
+  attendancePercent: number;
+}
 
-  const [userRes, enrollmentsRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<Enrollment[]>("/enrollments/my"),
-  ]);
+export default function MyCourseDetailPage() {
+  const { user } = useAuth();
+  const { enrollmentId } = useParams<{ enrollmentId: string }>();
+  const router = useRouter();
+  const [data, setData] = useState<PageData | null>(null);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  const user = userRes.data;
+  useEffect(() => {
+    Promise.all([
+      api.get<Enrollment[]>("/enrollments/my"),
+      api.get<SessionRow[]>(`/enrollments/${enrollmentId}/sessions`),
+      api.get<{ attendancePercent: number }>(`/enrollments/${enrollmentId}/attendance`),
+    ]).then(([enrollmentsRes, sessionsRes, attendanceRes]) => {
+      const enrollment = (enrollmentsRes.data ?? []).find((e) => e._id === enrollmentId);
+      if (!enrollment || enrollment.status !== "approved") {
+        router.replace("/dashboard");
+        return;
+      }
+      setData({
+        enrollment,
+        sessions: sessionsRes.data ?? [],
+        attendancePercent: attendanceRes.data?.attendancePercent ?? 0,
+      });
+    });
+  }, [enrollmentId, router]);
 
-  const enrollment = (enrollmentsRes.data ?? []).find(
-    (e) => e._id === enrollmentId
-  );
-  if (!enrollment || enrollment.status !== "approved") notFound();
+  if (!user || !data) return null;
 
-  const [sessionsRes, attendanceRes] = await Promise.all([
-    api.get<SessionRow[]>(`/enrollments/${enrollmentId}/sessions`),
-    api.get<{ attendancePercent: number }>(`/enrollments/${enrollmentId}/attendance`),
-  ]);
-
-  const sessions: SessionRow[] = sessionsRes.data ?? [];
-  const attendancePercent = attendanceRes.data?.attendancePercent ?? 0;
+  const { enrollment, sessions, attendancePercent } = data;
   const course = enrollment.courseId as Course;
 
   const quizScores = sessions
     .filter((s) => s.quizScore && s.quizScore.mcTotal > 0)
-    .map((s) =>
-      Math.round(((s.quizScore!.mcScore) / (s.quizScore!.mcTotal)) * 100)
-    );
+    .map((s) => Math.round((s.quizScore!.mcScore / s.quizScore!.mcTotal) * 100));
   const quizAvg =
     quizScores.length > 0
       ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length)
@@ -80,7 +87,7 @@ export default async function MyCourseDetailPage({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-          <Card className="shadow-lg shadow-black/20 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent card-glow animate-fade-in-up stagger-1 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+          <Card className="shadow-lg shadow-black/20 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent card-glow animate-fade-in-up stagger-1 hover:shadow-xl transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 hover:-translate-y-0.5">
             <CardContent className="py-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm tracking-wide uppercase text-muted-foreground flex items-center gap-2 font-semibold">
@@ -94,7 +101,7 @@ export default async function MyCourseDetailPage({
             </CardContent>
           </Card>
 
-          <Card className="shadow-lg shadow-black/20 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent card-glow animate-fade-in-up stagger-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+          <Card className="shadow-lg shadow-black/20 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent card-glow animate-fade-in-up stagger-2 hover:shadow-xl transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 hover:-translate-y-0.5">
             <CardContent className="py-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm tracking-wide uppercase text-muted-foreground flex items-center gap-2 font-semibold">
@@ -170,7 +177,7 @@ export default async function MyCourseDetailPage({
                       <span className="text-sm font-bold" style={{ color: quizPct !== null ? undefined : "#6b6b80" }}>
                         {quizPct !== null ? `${quizPct}%` : "—"}
                       </span>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-0.5 transition-all duration-200 ml-auto" />
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-0.5 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 ml-auto" />
                     </Link>
                   );
                 })

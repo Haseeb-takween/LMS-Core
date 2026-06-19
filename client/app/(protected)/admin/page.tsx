@@ -1,7 +1,10 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import AdminShell from "./_components/AdminShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Clock, BookOpen, Award, ClipboardList, CalendarCheck, FileQuestion, ArrowRight } from "lucide-react";
@@ -21,20 +24,27 @@ interface Course {
   schedule: string;
 }
 
-export default async function AdminPage() {
-  const api = await getServerApi();
-  const [userRes, statsRes, coursesRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<AdminStats>("/admin/stats"),
-    api.get<Course[]>("/courses"),
-  ]);
+export default function AdminPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  if (!statsRes.success) redirect("/login");
+  useEffect(() => {
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
 
-  const user = userRes.data;
-  const stats = statsRes.data!;
-  const courses: Course[] = coursesRes.data ?? [];
+  useEffect(() => {
+    Promise.all([
+      api.get<AdminStats>("/admin/stats"),
+      api.get<Course[]>("/courses"),
+    ]).then(([statsRes, coursesRes]) => {
+      if (statsRes.success && statsRes.data) setStats(statsRes.data);
+      if (coursesRes.success && coursesRes.data) setCourses(coursesRes.data);
+    });
+  }, []);
+
+  if (!user || user.role !== "admin" || !stats) return null;
 
   const statCards = [
     { label: "Total Students", value: stats.totalUsers, icon: Users, gradient: "from-blue-500/10 via-blue-500/5 to-transparent", accent: false, href: null as string | null },
@@ -66,7 +76,7 @@ export default async function AdminPage() {
           {statCards.map((card, i) => {
             const inner = (
               <Card
-                className={`bg-gradient-to-br ${card.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1} ${card.accent ? "animate-border-glow" : ""} ${card.href ? "cursor-pointer" : ""} h-full`}
+                className={`bg-gradient-to-br ${card.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1} ${card.accent ? "animate-border-glow" : ""} ${card.href ? "cursor-pointer" : ""} h-full`}
               >
                 <CardContent className="flex flex-col gap-3 py-6">
                   <card.icon className="w-6 h-6 text-muted-foreground/30" />
@@ -97,9 +107,9 @@ export default async function AdminPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {quickActions.map((a, i) => (
               <Link key={a.href} href={a.href} className="block">
-                <Card className={`shadow-md shadow-black/10 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer group card-glow h-full animate-fade-in-up stagger-${i + 1}`}>
+                <Card className={`shadow-md shadow-black/10 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 hover:-translate-y-1 cursor-pointer group card-glow h-full animate-fade-in-up stagger-${i + 1}`}>
                   <CardContent className="flex items-center gap-3 py-5">
-                    <a.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
+                    <a.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300" />
                     <span className="text-sm tracking-wide uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-200 font-bold">
                       {a.label}
                     </span>
@@ -135,7 +145,7 @@ export default async function AdminPage() {
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-1 transition-all duration-200" />
+                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-1 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200" />
                 </Link>
               ))}
             </Card>

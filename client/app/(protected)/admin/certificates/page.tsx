@@ -1,6 +1,9 @@
-import { redirect } from "next/navigation";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser } from "@/lib/api";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import CertificateTable from "./CertificateTable";
 
@@ -15,17 +18,22 @@ interface Certificate {
   rejectionReason?: string;
 }
 
-export default async function CertificatesPage() {
-  const api = await getServerApi();
-  const [userRes, certsRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<Certificate[]>("/admin/certificates"),
-  ]);
+export default function CertificatesPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
+  useEffect(() => {
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
 
-  const user = userRes.data;
-  const certificates: Certificate[] = certsRes.data ?? [];
+  useEffect(() => {
+    api.get<Certificate[]>("/admin/certificates").then((res) => {
+      if (res.success && res.data) setCertificates(res.data);
+    });
+  }, []);
+
+  if (!user || user.role !== "admin") return null;
 
   return (
     <AdminShell user={user}>

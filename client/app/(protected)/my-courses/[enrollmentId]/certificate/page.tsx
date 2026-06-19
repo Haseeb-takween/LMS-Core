@@ -1,33 +1,30 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type CertificateData, RAW_API_URL } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type CertificateData, RAW_API_URL } from "@/lib/api";
 import Navbar from "../../../_components/Navbar";
 import AnimatedBar from "../../../_components/AnimatedBar";
 
-export default async function CertificatePage({
-  params,
-}: {
-  params: Promise<{ enrollmentId: string }>;
-}) {
-  const { enrollmentId } = await params;
-  const api = await getServerApi();
+export default function CertificatePage() {
+  const { user } = useAuth();
+  const { enrollmentId } = useParams<{ enrollmentId: string }>();
+  const router = useRouter();
+  const [cert, setCert] = useState<CertificateData | null>(null);
 
-  const [userRes, certRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<CertificateData>(`/enrollments/${enrollmentId}/certificate`),
-  ]);
+  useEffect(() => {
+    api.get<CertificateData>(`/enrollments/${enrollmentId}/certificate`).then((res) => {
+      if (res.success && res.data) {
+        setCert(res.data);
+      } else {
+        router.replace(`/my-courses/${enrollmentId}`);
+      }
+    });
+  }, [enrollmentId, router]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-
-  const user = userRes.data;
-  const cert: CertificateData = certRes.data ?? {
-    status: "not_eligible",
-    attendancePercent: 0,
-    quizAverage: 0,
-    attendanceThreshold: 80,
-    quizThreshold: 70,
-  };
+  if (!user || !cert) return null;
 
   return (
     <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">
@@ -59,7 +56,6 @@ export default async function CertificatePage({
               Complete the requirements below to qualify for a certificate.
             </p>
 
-            {/* Attendance progress */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#6b6b80]">
@@ -76,7 +72,6 @@ export default async function CertificatePage({
               />
             </div>
 
-            {/* Quiz progress */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#6b6b80]">
@@ -103,11 +98,7 @@ export default async function CertificatePage({
             <div className="flex items-center gap-3">
               <span
                 className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-2 py-1 animate-pulse"
-                style={{
-                  color: "#d97706",
-                  background: "rgba(217,119,6,0.08)",
-                  border: "1px solid rgba(217,119,6,0.3)",
-                }}
+                style={{ color: "#d97706", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.3)" }}
               >
                 Pending Approval
               </span>
@@ -116,25 +107,16 @@ export default async function CertificatePage({
               Your certificate is awaiting admin review
             </p>
             <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] leading-5">
-              You have met all requirements. An admin will review and approve your
-              certificate shortly.
+              You have met all requirements. An admin will review and approve your certificate shortly.
             </p>
             <div className="flex gap-8 pt-2 border-t border-[#1e1e2e]">
               <div>
-                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">
-                  Attendance
-                </p>
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#d97706]">
-                  {cert.attendancePercent}%
-                </p>
+                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">Attendance</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#d97706]">{cert.attendancePercent}%</p>
               </div>
               <div>
-                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">
-                  Quiz Avg
-                </p>
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#d97706]">
-                  {cert.quizAverage}%
-                </p>
+                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">Quiz Avg</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#d97706]">{cert.quizAverage}%</p>
               </div>
             </div>
           </div>
@@ -148,16 +130,11 @@ export default async function CertificatePage({
             <div className="flex items-center gap-3">
               <span
                 className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-2 py-1"
-                style={{
-                  color: "#1d4ed8",
-                  background: "rgba(29,78,216,0.08)",
-                  border: "1px solid rgba(29,78,216,0.3)",
-                }}
+                style={{ color: "#1d4ed8", background: "rgba(29,78,216,0.08)", border: "1px solid rgba(29,78,216,0.3)" }}
               >
                 Approved
               </span>
             </div>
-
             <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#e8e8f0]">
               Certificate of Completion
             </p>
@@ -167,26 +144,16 @@ export default async function CertificatePage({
                 <> Issued on {new Date(cert.approvedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.</>
               )}
             </p>
-
             <div className="flex gap-8 py-4 border-y border-[#1e1e2e]">
               <div>
-                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">
-                  Attendance
-                </p>
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#1d4ed8]">
-                  {cert.attendancePercent}%
-                </p>
+                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">Attendance</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#1d4ed8]">{cert.attendancePercent}%</p>
               </div>
               <div>
-                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">
-                  Quiz Avg
-                </p>
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#1d4ed8]">
-                  {cert.quizAverage}%
-                </p>
+                <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-0.5">Quiz Avg</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#1d4ed8]">{cert.quizAverage}%</p>
               </div>
             </div>
-
             <a
               href={`${RAW_API_URL}/api/v1/enrollments/${enrollmentId}/certificate/download`}
               target="_blank"
@@ -206,11 +173,7 @@ export default async function CertificatePage({
             <div className="flex items-center gap-3">
               <span
                 className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-2 py-1"
-                style={{
-                  color: "#dc2626",
-                  background: "rgba(220,38,38,0.08)",
-                  border: "1px solid rgba(220,38,38,0.3)",
-                }}
+                style={{ color: "#dc2626", background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)" }}
               >
                 Rejected
               </span>
@@ -221,11 +184,7 @@ export default async function CertificatePage({
             {cert.rejectionReason && (
               <div
                 className="font-[family-name:var(--font-ibm-plex-mono)] text-xs px-4 py-3 leading-5"
-                style={{
-                  color: "#e8e8f0",
-                  background: "rgba(220,38,38,0.06)",
-                  borderLeft: "2px solid #dc2626",
-                }}
+                style={{ color: "#e8e8f0", background: "rgba(220,38,38,0.06)", borderLeft: "2px solid #dc2626" }}
               >
                 {cert.rejectionReason}
               </div>

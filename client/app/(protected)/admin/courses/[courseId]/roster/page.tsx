@@ -1,7 +1,10 @@
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import AdminShell from "../../../_components/AdminShell";
 import RosterGrid from "./RosterGrid";
 
@@ -16,24 +19,29 @@ interface RosterData {
   }[];
 }
 
-export default async function RosterPage({
-  params,
-}: {
-  params: Promise<{ courseId: string }>;
-}) {
-  const { courseId } = await params;
-  const api = await getServerApi();
+export default function RosterPage() {
+  const { user } = useAuth();
+  const { courseId } = useParams<{ courseId: string }>();
+  const router = useRouter();
+  const [roster, setRoster] = useState<RosterData | null>(null);
 
-  const [userRes, rosterRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<RosterData>(`/admin/courses/${courseId}/roster`),
-  ]);
+  useEffect(() => {
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  if (!rosterRes.success || !rosterRes.data) notFound();
+  useEffect(() => {
+    api.get<RosterData>(`/admin/courses/${courseId}/roster`).then((res) => {
+      if (res.success && res.data) {
+        setRoster(res.data);
+      } else {
+        router.replace("/admin");
+      }
+    });
+  }, [courseId, router]);
 
-  const user = userRes.data;
-  const { course, sessions, students } = rosterRes.data;
+  if (!user || user.role !== "admin" || !roster) return null;
+
+  const { course, sessions, students } = roster;
 
   return (
     <AdminShell user={user}>
@@ -58,7 +66,6 @@ export default async function RosterPage({
           </p>
         </div>
 
-        {/* Legend */}
         <div className="flex items-center gap-6 mb-6">
           <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-[#6b6b80] tracking-widest uppercase">
             Legend:

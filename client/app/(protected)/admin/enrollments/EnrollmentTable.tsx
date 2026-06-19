@@ -58,7 +58,7 @@ export default function EnrollmentTable({ initialEnrollments, initialFilter }: E
           <button
             key={f}
             onClick={() => fetchFiltered(f)}
-            className={`text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-md transition-all duration-150 btn-press ${
+            className={`text-xs font-semibold tracking-wide uppercase px-4 py-2 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-150 btn-press ${
               filter === f
                 ? "bg-secondary text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -97,7 +97,7 @@ export default function EnrollmentTable({ initialEnrollments, initialFilter }: E
               return (
                 <div
                   key={enr._id}
-                  className="grid items-center px-5 py-4 border-b border-border last:border-0 transition-all duration-300 row-highlight"
+                  className="grid items-center px-5 py-4 border-b border-border last:border-0 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300 row-highlight"
                   style={{
                     gridTemplateColumns: "1fr 1fr 7rem 6rem 9rem",
                     opacity: isRemoving ? 0 : 1,
@@ -121,14 +121,14 @@ export default function EnrollmentTable({ initialEnrollments, initialFilter }: E
                         <button
                           onClick={() => handleAction(enr._id, "approve")}
                           disabled={isLoading}
-                          className="text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-all disabled:opacity-40 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-sm btn-press"
+                          className="text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-40 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-sm btn-press"
                         >
                           {isLoading ? "…" : "Approve"}
                         </button>
                         <button
                           onClick={() => handleAction(enr._id, "reject")}
                           disabled={isLoading}
-                          className="text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-all disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:shadow-sm btn-press"
+                          className="text-xs font-bold tracking-wider uppercase px-3 py-1.5 rounded-md transition-[transform,box-shadow,border-color,opacity,background-color,color] disabled:opacity-40 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:shadow-sm btn-press"
                         >
                           Reject
                         </button>

@@ -1,6 +1,9 @@
-import { redirect } from "next/navigation";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser } from "@/lib/api";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import EnrollmentTable from "./EnrollmentTable";
 
@@ -12,17 +15,22 @@ interface Enrollment {
   requestedAt: string;
 }
 
-export default async function EnrollmentsPage() {
-  const api = await getServerApi();
-  const [userRes, enrollmentsRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<Enrollment[]>("/admin/enrollments"),
-  ]);
+export default function EnrollmentsPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
+  useEffect(() => {
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
 
-  const user = userRes.data;
-  const enrollments: Enrollment[] = enrollmentsRes.data ?? [];
+  useEffect(() => {
+    api.get<Enrollment[]>("/admin/enrollments").then((res) => {
+      if (res.success && res.data) setEnrollments(res.data);
+    });
+  }, []);
+
+  if (!user || user.role !== "admin") return null;
 
   return (
     <AdminShell user={user}>

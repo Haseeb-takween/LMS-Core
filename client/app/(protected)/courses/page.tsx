@@ -1,22 +1,25 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type Course } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type Course } from "@/lib/api";
 import Navbar from "../_components/Navbar";
 import EnrollButton from "./EnrollButton";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { BookOpen, Calendar } from "lucide-react";
 
-export default async function CoursesPage() {
-  const api = await getServerApi();
-  const [userRes, coursesRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<Course[]>("/courses"),
-  ]);
+export default function CoursesPage() {
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<Course[]>([]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  const user = userRes.data;
-  const courses: Course[] = coursesRes.data ?? [];
+  useEffect(() => {
+    api.get<Course[]>("/courses").then((res) => {
+      if (res.success && res.data) setCourses(res.data);
+    });
+  }, []);
+
+  if (!user) return null;
 
   return (
     <div className="min-h-dvh bg-background flex flex-col">

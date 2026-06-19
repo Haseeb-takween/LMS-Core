@@ -1,28 +1,31 @@
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type SessionDetail } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type SessionDetail } from "@/lib/api";
 import Navbar from "../../../../_components/Navbar";
 import QuizForm from "./QuizForm";
 
-export default async function SessionDetailPage({
-  params,
-}: {
-  params: Promise<{ enrollmentId: string; sessionId: string }>;
-}) {
-  const { enrollmentId, sessionId } = await params;
-  const api = await getServerApi();
+export default function SessionDetailPage() {
+  const { user } = useAuth();
+  const { enrollmentId, sessionId } = useParams<{ enrollmentId: string; sessionId: string }>();
+  const router = useRouter();
+  const [session, setSession] = useState<SessionDetail | null>(null);
 
-  const [userRes, sessionRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<SessionDetail>(`/enrollments/${enrollmentId}/sessions/${sessionId}`),
-  ]);
+  useEffect(() => {
+    api.get<SessionDetail>(`/enrollments/${enrollmentId}/sessions/${sessionId}`).then((res) => {
+      if (res.success && res.data) {
+        setSession(res.data);
+      } else {
+        router.replace(`/my-courses/${enrollmentId}`);
+      }
+    });
+  }, [enrollmentId, sessionId, router]);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  if (!sessionRes.success || !sessionRes.data) notFound();
+  if (!user || !session) return null;
 
-  const user = userRes.data;
-  const session = sessionRes.data;
   const submitted = !!session.submission;
   const questions = session.quiz?.questions ?? [];
 
@@ -31,7 +34,6 @@ export default async function SessionDetailPage({
       <Navbar user={user} />
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-8 py-10">
-        {/* Breadcrumb */}
         <div className="mb-8 flex items-center gap-2 flex-wrap">
           <Link
             href={`/my-courses/${enrollmentId}`}
@@ -45,7 +47,6 @@ export default async function SessionDetailPage({
           </span>
         </div>
 
-        {/* Session header */}
         <div className="mb-8 pb-6 border-b border-[#1e1e2e]">
           <div className="flex items-center gap-2 mb-2">
             <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] tracking-widest uppercase">
@@ -56,10 +57,7 @@ export default async function SessionDetailPage({
                 className="font-[family-name:var(--font-ibm-plex-mono)] text-[8px] tracking-widest uppercase px-1.5 py-0.5"
                 style={{
                   color: session.attendanceStatus === "attended" ? "#1d4ed8" : "#dc2626",
-                  background:
-                    session.attendanceStatus === "attended"
-                      ? "rgba(29,78,216,0.08)"
-                      : "rgba(220,38,38,0.08)",
+                  background: session.attendanceStatus === "attended" ? "rgba(29,78,216,0.08)" : "rgba(220,38,38,0.08)",
                   border: `1px solid ${session.attendanceStatus === "attended" ? "rgba(29,78,216,0.25)" : "rgba(220,38,38,0.25)"}`,
                 }}
               >
@@ -77,7 +75,6 @@ export default async function SessionDetailPage({
           )}
         </div>
 
-        {/* Quiz section */}
         {questions.length === 0 ? (
           <div className="border border-[#1e1e2e] px-5 py-6 font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80]">
             No quiz for this session.
@@ -91,11 +88,7 @@ export default async function SessionDetailPage({
               {submitted && session.submission && (
                 <span
                   className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase px-2 py-1"
-                  style={{
-                    color: "#1d4ed8",
-                    background: "rgba(29,78,216,0.08)",
-                    border: "1px solid rgba(29,78,216,0.25)",
-                  }}
+                  style={{ color: "#1d4ed8", background: "rgba(29,78,216,0.08)", border: "1px solid rgba(29,78,216,0.25)" }}
                 >
                   {session.submission.mcTotal > 0
                     ? `Score: ${session.submission.mcScore}/${session.submission.mcTotal}`
@@ -105,12 +98,9 @@ export default async function SessionDetailPage({
             </div>
 
             {submitted && session.submission ? (
-              /* Read-only submitted view */
               <div className="flex flex-col gap-5">
                 {questions.map((q, i) => {
-                  const ans = session.submission!.answers.find(
-                    (a) => a.questionId === q._id
-                  );
+                  const ans = session.submission!.answers.find((a) => a.questionId === q._id);
                   const isCorrect = ans?.isCorrect;
                   const isMc = q.type === "mc";
 
@@ -128,9 +118,7 @@ export default async function SessionDetailPage({
                             className="shrink-0 font-[family-name:var(--font-ibm-plex-mono)] text-[8px] tracking-widest uppercase px-1.5 py-0.5 ml-auto"
                             style={{
                               color: isCorrect ? "#1d4ed8" : "#dc2626",
-                              background: isCorrect
-                                ? "rgba(29,78,216,0.08)"
-                                : "rgba(220,38,38,0.08)",
+                              background: isCorrect ? "rgba(29,78,216,0.08)" : "rgba(220,38,38,0.08)",
                               border: `1px solid ${isCorrect ? "rgba(29,78,216,0.25)" : "rgba(220,38,38,0.25)"}`,
                             }}
                           >
@@ -159,10 +147,7 @@ export default async function SessionDetailPage({
                                   }}
                                 >
                                   {isStudentAnswer && (
-                                    <span
-                                      className="w-1.5 h-1.5"
-                                      style={{ background: color }}
-                                    />
+                                    <span className="w-1.5 h-1.5" style={{ background: color }} />
                                   )}
                                 </span>
                                 <span
@@ -195,7 +180,6 @@ export default async function SessionDetailPage({
                 })}
               </div>
             ) : (
-              /* Unsubmitted form */
               <QuizForm
                 enrollmentId={enrollmentId}
                 sessionId={sessionId}

@@ -1,27 +1,32 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type Enrollment, type Course } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type Enrollment, type Course } from "@/lib/api";
 import Navbar from "../_components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 
-export default async function DashboardPage() {
-  const api = await getServerApi();
-  const userRes = await api.get<AuthUser>("/auth/me");
-  if (!userRes.success || !userRes.data) redirect("/login");
-  const user = userRes.data;
+const statusVariant = (s: string) =>
+  s === "approved" ? "default" : s === "pending" ? "secondary" : "destructive";
 
-  const enrollRes = await api.get<Enrollment[]>("/enrollments/my");
-  const enrollments: Enrollment[] = enrollRes.data ?? [];
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+
+  useEffect(() => {
+    api.get<Enrollment[]>("/enrollments/my").then((res) => {
+      if (res.success && res.data) setEnrollments(res.data);
+    });
+  }, []);
+
+  if (!user) return null;
 
   const total = enrollments.length;
   const pending = enrollments.filter((e) => e.status === "pending").length;
   const approved = enrollments.filter((e) => e.status === "approved").length;
-
-  const statusVariant = (s: string) =>
-    s === "approved" ? "default" : s === "pending" ? "secondary" : "destructive";
 
   return (
     <div className="min-h-dvh bg-background flex flex-col">

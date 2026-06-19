@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,7 +35,8 @@ interface QuizResult {
 }
 
 export default function QuizResultsPage() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [results, setResults] = useState<QuizResult[]>([]);
@@ -41,12 +44,12 @@ export default function QuizResultsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      api.get<{ name: string; email: string }>("/auth/me"),
-      api.get<Course[]>("/courses"),
-    ]).then(([userRes, coursesRes]) => {
-      if (userRes.success && userRes.data) setUser(userRes.data);
-      if (coursesRes.success && coursesRes.data) setCourses(coursesRes.data);
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
+
+  useEffect(() => {
+    api.get<Course[]>("/courses").then((res) => {
+      if (res.success && res.data) setCourses(res.data);
     });
   }, []);
 

@@ -117,7 +117,7 @@ export default function Navbar({ user }: NavbarProps) {
                         key={enr._id}
                         href={enr.status === "approved" ? `/my-courses/${enr._id}` : "#"}
                         onClick={() => setDropdownOpen(false)}
-                        className={`flex items-center justify-between px-4 py-3.5 border-b border-border last:border-0 hover:bg-secondary/50 transition-all duration-150 row-highlight animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
+                        className={`flex items-center justify-between px-4 py-3.5 border-b border-border last:border-0 hover:bg-secondary/50 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-150 row-highlight animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
                       >
                         <span className="text-sm text-foreground truncate max-w-[160px] font-semibold">
                           {typeof course === "object" ? course.title : "Course"}

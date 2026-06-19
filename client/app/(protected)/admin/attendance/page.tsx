@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +27,8 @@ type SortKey = "name" | "attendancePercent";
 type SortDir = "asc" | "desc";
 
 export default function AttendancePage() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
   const [rows, setRows] = useState<AttendanceRow[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [search, setSearch] = useState("");
@@ -35,12 +38,12 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      api.get<{ name: string; email: string }>("/auth/me"),
-      api.get<Course[]>("/courses"),
-    ]).then(([userRes, coursesRes]) => {
-      if (userRes.success && userRes.data) setUser(userRes.data);
-      if (coursesRes.success && coursesRes.data) setCourses(coursesRes.data);
+    if (user && user.role !== "admin") router.replace("/dashboard");
+  }, [user, router]);
+
+  useEffect(() => {
+    api.get<Course[]>("/courses").then((res) => {
+      if (res.success && res.data) setCourses(res.data);
     });
   }, []);
 
@@ -198,7 +201,7 @@ export default function AttendancePage() {
                       </div>
                       <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
                         <div
-                          className="h-full transition-all duration-500 rounded-full"
+                          className="h-full transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-500 rounded-full"
                           style={{ width: `${pct}%`, background: barColor }}
                         />
                       </div>

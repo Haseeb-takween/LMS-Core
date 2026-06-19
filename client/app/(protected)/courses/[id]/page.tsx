@@ -1,29 +1,33 @@
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getServerApi } from "@/lib/api-server";
-import { type AuthUser, type Course } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { api, type Course } from "@/lib/api";
 import Navbar from "../../_components/Navbar";
 import EnrollButton from "../EnrollButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, Calendar, Lock, Circle } from "lucide-react";
 
-export default async function CourseDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const api = await getServerApi();
-  const [userRes, courseRes] = await Promise.all([
-    api.get<AuthUser>("/auth/me"),
-    api.get<Course>(`/courses/${id}`),
-  ]);
+export default function CourseDetailPage() {
+  const { user } = useAuth();
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [course, setCourse] = useState<Course | null>(null);
 
-  if (!userRes.success || !userRes.data) redirect("/login");
-  if (!courseRes.success || !courseRes.data) notFound();
+  useEffect(() => {
+    api.get<Course>(`/courses/${id}`).then((res) => {
+      if (res.success && res.data) {
+        setCourse(res.data);
+      } else {
+        router.replace("/courses");
+      }
+    });
+  }, [id, router]);
 
-  const user = userRes.data;
-  const course = courseRes.data;
+  if (!user || !course) return null;
+
   const sessions = course.sessions ?? [];
   const isApproved = course.enrollmentStatus === "approved";
 
@@ -59,7 +63,7 @@ export default async function CourseDetailPage({
               </p>
             </div>
 
-            <Card className="shadow-lg shadow-black/20 card-glow animate-fade-in-up stagger-2 hover:shadow-xl transition-all duration-300">
+            <Card className="shadow-lg shadow-black/20 card-glow animate-fade-in-up stagger-2 hover:shadow-xl transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300">
               <CardContent className="flex items-center gap-4 py-5">
                 <Calendar className="w-5 h-5 text-primary/60" />
                 <div>
@@ -73,7 +77,7 @@ export default async function CourseDetailPage({
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg shadow-black/20 card-glow animate-fade-in-up stagger-3 hover:shadow-xl transition-all duration-300">
+            <Card className="shadow-lg shadow-black/20 card-glow animate-fade-in-up stagger-3 hover:shadow-xl transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-300">
               <CardContent className="flex flex-col gap-4 py-5">
                 <p className="text-xs tracking-widest uppercase text-muted-foreground font-semibold">
                   Enrollment
