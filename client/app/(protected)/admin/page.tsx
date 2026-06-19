@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getServerApi } from "@/lib/api-server";
 import { type AuthUser } from "@/lib/api";
 import AdminShell from "./_components/AdminShell";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Clock, BookOpen, Award, ClipboardList, CalendarCheck, FileQuestion, ArrowRight } from "lucide-react";
 
 interface AdminStats {
   totalUsers: number;
@@ -35,126 +37,114 @@ export default async function AdminPage() {
   const courses: Course[] = coursesRes.data ?? [];
 
   const statCards = [
-    { label: "Total Students", value: stats.totalUsers, href: null },
-    {
-      label: "Pending Enrollments",
-      value: stats.pendingEnrollments,
-      href: "/admin/enrollments",
-      accent: stats.pendingEnrollments > 0 ? "#d97706" : undefined,
-    },
-    { label: "Total Courses", value: stats.totalCourses, href: null },
-    {
-      label: "Pending Certificates",
-      value: stats.pendingCertificates,
-      href: "/admin/certificates",
-      accent: stats.pendingCertificates > 0 ? "#d97706" : undefined,
-    },
+    { label: "Total Students", value: stats.totalUsers, icon: Users, gradient: "from-blue-500/10 via-blue-500/5 to-transparent", accent: false, href: null as string | null },
+    { label: "Pending Enrollments", value: stats.pendingEnrollments, href: "/admin/enrollments", icon: Clock, gradient: "from-amber-500/10 via-amber-500/5 to-transparent", accent: stats.pendingEnrollments > 0 },
+    { label: "Total Courses", value: stats.totalCourses, icon: BookOpen, gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent", accent: false, href: null as string | null },
+    { label: "Pending Certificates", value: stats.pendingCertificates, href: "/admin/certificates", icon: Award, gradient: "from-purple-500/10 via-purple-500/5 to-transparent", accent: stats.pendingCertificates > 0 },
+  ];
+
+  const quickActions = [
+    { label: "Manage Enrollments", href: "/admin/enrollments", icon: ClipboardList },
+    { label: "View Attendance", href: "/admin/attendance", icon: CalendarCheck },
+    { label: "Quiz Results", href: "/admin/quiz-results", icon: FileQuestion },
+    { label: "Certificates", href: "/admin/certificates", icon: Award },
   ];
 
   return (
     <AdminShell user={user}>
-      <main className="flex-1 px-8 py-10 max-w-5xl w-full mx-auto">
-        {/* Header */}
-        <div className="mb-10 pb-6 border-b border-[#1e1e2e]">
-          <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-1 tracking-widest uppercase">
+      <main className="flex-1 px-6 sm:px-8 py-10 max-w-5xl w-full mx-auto">
+        <div className="mb-10 animate-fade-in-up">
+          <p className="text-xs text-muted-foreground mb-2 tracking-widest uppercase font-semibold">
             Overview
           </p>
-          <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold text-[#e8e8f0]">
+          <h1 className="font-[family-name:var(--font-syne)] text-4xl font-extrabold text-foreground tracking-tight">
             Admin Dashboard
           </h1>
         </div>
 
-        {/* 4 stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {statCards.map((card) => (
-            <div
-              key={card.label}
-              className="bg-[#12121a] border border-[#1e1e2e] p-5 flex flex-col gap-2 hover:border-[#2a2a3e] transition-colors"
-            >
-              <span
-                className="font-[family-name:var(--font-syne)] text-3xl font-bold"
-                style={{ color: card.accent ?? "#e8e8f0" }}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+          {statCards.map((card, i) => {
+            const inner = (
+              <Card
+                className={`bg-gradient-to-br ${card.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1} ${card.accent ? "animate-border-glow" : ""} ${card.href ? "cursor-pointer" : ""} h-full`}
               >
-                {card.value}
-              </span>
-              <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#6b6b80]">
-                {card.label}
-              </span>
-              {card.href && (
-                <Link
-                  href={card.href}
-                  className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#4f8ef7] hover:opacity-80 transition-opacity mt-auto"
-                >
-                  View →
-                </Link>
-              )}
-            </div>
-          ))}
+                <CardContent className="flex flex-col gap-3 py-6">
+                  <card.icon className="w-6 h-6 text-muted-foreground/30" />
+                  <span
+                    className="font-[family-name:var(--font-syne)] text-4xl font-extrabold animate-count-up tracking-tight"
+                    style={{ color: card.accent ? "#d97706" : undefined }}
+                  >
+                    {card.value}
+                  </span>
+                  <span className="text-sm tracking-wide uppercase text-muted-foreground font-semibold">
+                    {card.label}
+                  </span>
+                </CardContent>
+              </Card>
+            );
+            return card.href ? (
+              <Link key={card.label} href={card.href} className="block">{inner}</Link>
+            ) : (
+              <div key={card.label}>{inner}</div>
+            );
+          })}
         </div>
 
-        {/* Quick actions */}
-        <div className="mb-10">
-          <h2 className="font-[family-name:var(--font-syne)] text-sm font-semibold text-[#e8e8f0] mb-4">
+        <div className="mb-12 animate-fade-in-up stagger-5">
+          <h2 className="font-[family-name:var(--font-syne)] text-2xl font-bold text-foreground mb-5 tracking-tight">
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { label: "Manage Enrollments", href: "/admin/enrollments" },
-              { label: "View Attendance",    href: "/admin/attendance"   },
-              { label: "Quiz Results",       href: "/admin/quiz-results" },
-              { label: "Certificates",       href: "/admin/certificates" },
-            ].map((a) => (
-              <Link
-                key={a.href}
-                href={a.href}
-                className="border border-[#1e1e2e] px-4 py-3 font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-[0.15em] uppercase text-[#6b6b80] hover:border-[#4f8ef7] hover:text-[#4f8ef7] transition-colors duration-150"
-              >
-                {a.label} →
+            {quickActions.map((a, i) => (
+              <Link key={a.href} href={a.href} className="block">
+                <Card className={`shadow-md shadow-black/10 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer group card-glow h-full animate-fade-in-up stagger-${i + 1}`}>
+                  <CardContent className="flex items-center gap-3 py-5">
+                    <a.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
+                    <span className="text-sm tracking-wide uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-200 font-bold">
+                      {a.label}
+                    </span>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Course rosters */}
         {courses.length > 0 && (
-          <div>
-            <h2 className="font-[family-name:var(--font-syne)] text-sm font-semibold text-[#e8e8f0] mb-4">
+          <div className="animate-fade-in-up stagger-6">
+            <h2 className="font-[family-name:var(--font-syne)] text-2xl font-bold text-foreground mb-5 tracking-tight">
               Course Rosters
             </h2>
-            <div className="border border-[#1e1e2e]">
+            <Card className="shadow-lg shadow-black/20 overflow-hidden">
               {courses.map((course, i) => (
-                <div
+                <Link
                   key={course._id}
-                  className="flex items-center justify-between px-5 py-4 border-b border-[#1e1e2e] last:border-0 hover:bg-[#12121a] transition-colors"
+                  href={`/admin/courses/${course._id}/roster`}
+                  className="flex items-center justify-between px-5 py-5 border-b border-border last:border-0 row-highlight group/row cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] w-5">
+                    <span className="text-sm text-muted-foreground w-6 group-hover/row:text-primary transition-colors duration-200 font-bold">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#e8e8f0]">
+                      <p className="text-base text-foreground font-bold group-hover/row:text-primary transition-colors duration-200">
                         {course.title}
                       </p>
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-[#6b6b80]">
+                      <p className="text-sm text-muted-foreground font-medium">
                         {course.schedule}
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/admin/courses/${course._id}/roster`}
-                    className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#4f8ef7] hover:opacity-80 transition-opacity"
-                  >
-                    Roster →
-                  </Link>
-                </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-1 transition-all duration-200" />
+                </Link>
               ))}
-            </div>
+            </Card>
           </div>
         )}
       </main>
 
-      <footer className="px-8 py-4 border-t border-[#1e1e2e]">
-        <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80]">
+      <footer className="px-8 py-6 border-t border-border">
+        <p className="text-xs text-muted-foreground font-medium">
           LMS Core v1.0 — Admin Access
         </p>
       </footer>

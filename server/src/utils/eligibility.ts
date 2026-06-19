@@ -22,12 +22,12 @@ export async function checkEligibility(enrollmentId: string): Promise<void> {
 
   const attendancePercent = Math.round((attendedCount / totalSessions) * 100);
 
-  const totalMcCorrect = submissions.reduce((sum, s) => sum + s.mcScore, 0);
-  const totalMcQuestions = submissions.reduce((sum, s) => sum + s.mcTotal, 0);
+  const totalCorrect = submissions.reduce((sum, s) => sum + s.mcScore, 0);
+  const totalGraded = submissions.reduce((sum, s) => sum + s.mcTotal, 0);
   const quizAverage =
-    totalMcQuestions === 0
+    totalGraded === 0
       ? 100
-      : Math.round((totalMcCorrect / totalMcQuestions) * 100);
+      : Math.round((totalCorrect / totalGraded) * 100);
 
   if (attendancePercent < ATTENDANCE_THRESHOLD || quizAverage < QUIZ_THRESHOLD) {
     return;

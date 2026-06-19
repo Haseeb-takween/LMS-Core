@@ -3,6 +3,9 @@ import Link from "next/link";
 import { getServerApi } from "@/lib/api-server";
 import { type AuthUser, type Enrollment, type Course } from "@/lib/api";
 import Navbar from "../_components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, Clock, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 
 export default async function DashboardPage() {
   const api = await getServerApi();
@@ -17,139 +20,120 @@ export default async function DashboardPage() {
   const pending = enrollments.filter((e) => e.status === "pending").length;
   const approved = enrollments.filter((e) => e.status === "approved").length;
 
-  const statusColor = (s: string) =>
-    s === "approved" ? "#1d4ed8" : s === "pending" ? "#d97706" : "#dc2626";
+  const statusVariant = (s: string) =>
+    s === "approved" ? "default" : s === "pending" ? "secondary" : "destructive";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar user={user} />
 
-      <main className="flex-1 px-8 py-10 max-w-5xl w-full mx-auto">
-
-        {/* Hero greeting */}
-        <div className="mb-10 pb-8 border-b border-[#1e1e2e] flex items-end justify-between">
-          <div>
-            <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] mb-1 tracking-widest uppercase">
-              Welcome back
-            </p>
-            <h1 className="font-[family-name:var(--font-syne)] text-4xl font-bold text-[#e8e8f0]">
-              {user.name}
-            </h1>
-            <p className="font-[family-name:var(--font-ibm-plex-mono)] text-xs text-[#6b6b80] mt-1">
-              {user.email}
-            </p>
-          </div>
-          <span
-            className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase px-2 py-1 hidden sm:inline"
-            style={{
-              color: "#4f8ef7",
-              background: "rgba(79,142,247,0.08)",
-              border: "1px solid rgba(79,142,247,0.2)",
-            }}
-          >
-            Student
-          </span>
+      <main className="flex-1 px-6 sm:px-8 py-10 max-w-5xl w-full mx-auto">
+        <div className="mb-10 animate-fade-in-up">
+          <p className="text-xs text-muted-foreground mb-2 tracking-widest uppercase font-semibold flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary animate-dot-pulse" />
+            Welcome back
+          </p>
+          <h1 className="font-[family-name:var(--font-syne)] text-5xl font-extrabold text-foreground tracking-tight leading-none">
+            {user.name}
+          </h1>
+          <p className="text-base text-muted-foreground mt-2 font-medium">
+            {user.email}
+          </p>
         </div>
 
-        {/* Stats strip */}
-        <div className="grid grid-cols-3 mb-10 border border-[#1e1e2e]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
           {[
-            { label: "Enrolled", value: total },
-            { label: "Pending", value: pending },
-            { label: "Approved", value: approved },
+            { label: "Enrolled", value: total, icon: BookOpen, gradient: "from-blue-500/10 via-blue-500/5 to-transparent" },
+            { label: "Pending", value: pending, icon: Clock, gradient: "from-amber-500/10 via-amber-500/5 to-transparent" },
+            { label: "Approved", value: approved, icon: CheckCircle2, gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent" },
           ].map((stat, i) => (
-            <div
-              key={stat.label}
-              className="px-6 py-5 flex flex-col gap-1"
-              style={{
-                borderRight: i < 2 ? "1px solid #1e1e2e" : undefined,
-              }}
-            >
-              <span className="font-[family-name:var(--font-syne)] text-2xl font-bold text-[#e8e8f0]">
-                {stat.value}
-              </span>
-              <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#6b6b80]">
-                {stat.label}
-              </span>
-            </div>
+            <Card key={stat.label} className={`bg-gradient-to-br ${stat.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1}`}>
+              <CardContent className="flex items-center justify-between py-6">
+                <div>
+                  <span className="font-[family-name:var(--font-syne)] text-5xl font-extrabold text-foreground animate-count-up tracking-tight">
+                    {stat.value}
+                  </span>
+                  <p className="text-sm tracking-wide uppercase text-muted-foreground mt-1 font-semibold">
+                    {stat.label}
+                  </p>
+                </div>
+                <stat.icon className="w-10 h-10 text-muted-foreground/15" />
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Enrolled courses */}
-        <div>
+        <div className="animate-fade-in-up stagger-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-[family-name:var(--font-syne)] text-base font-semibold text-[#e8e8f0]">
+            <h2 className="font-[family-name:var(--font-syne)] text-2xl font-bold text-foreground tracking-tight">
               My Courses
             </h2>
             <Link
               href="/courses"
-              className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#4f8ef7] hover:opacity-80 transition-opacity"
+              className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 font-semibold group/link"
             >
-              Browse more →
+              Browse more <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform duration-200" />
             </Link>
           </div>
 
           {enrollments.length === 0 ? (
-            <div className="border border-[#1e1e2e] px-6 py-10 text-center">
-              <p className="font-[family-name:var(--font-ibm-plex-mono)] text-xs text-[#6b6b80] mb-4">
-                No enrollments yet.
-              </p>
-              <Link
-                href="/courses"
-                className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#4f8ef7] hover:opacity-80 transition-opacity"
-              >
-                Browse courses →
-              </Link>
-            </div>
+            <Link href="/courses" className="block">
+              <Card className="shadow-lg shadow-black/20 animate-fade-in-scale hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer">
+                <CardContent className="py-12 text-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4 animate-dot-pulse" />
+                  <p className="text-base text-muted-foreground mb-2 font-semibold">
+                    No enrollments yet
+                  </p>
+                  <p className="text-sm text-primary font-semibold flex items-center justify-center gap-1">
+                    Browse courses <ArrowRight className="w-4 h-4" />
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {enrollments.map((enr) => {
+              {enrollments.map((enr, i) => {
                 const course = enr.courseId as Course;
-                const sc = statusColor(enr.status);
+                const href = enr.status === "approved" ? `/my-courses/${enr._id}` : `/courses`;
                 return (
-                  <div
-                    key={enr._id}
-                    className="bg-[#12121a] border border-[#1e1e2e] p-6 flex flex-col gap-4 hover:border-[#2a2a3e] transition-colors duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="w-1 h-1 bg-[#4f8ef7]" />
-                      <span
-                        className="font-[family-name:var(--font-ibm-plex-mono)] text-[8px] tracking-widest uppercase px-1.5 py-0.5"
-                        style={{
-                          color: sc,
-                          background: `${sc}14`,
-                          border: `1px solid ${sc}33`,
-                        }}
-                      >
-                        {enr.status}
-                      </span>
-                    </div>
+                  <Link key={enr._id} href={href} className="block">
+                    <Card
+                      className={`shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1.5 group card-glow cursor-pointer h-full animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
+                    >
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="w-2 h-2 rounded-full bg-primary animate-dot-pulse" />
+                          <Badge variant={statusVariant(enr.status)} className="text-[9px] tracking-widest uppercase badge-pop font-bold px-2.5 py-1">
+                            {enr.status}
+                          </Badge>
+                        </div>
+                        <CardTitle className="font-[family-name:var(--font-syne)] text-lg font-bold leading-snug mt-3 tracking-tight group-hover:text-primary transition-colors duration-300">
+                          {typeof course === "object" ? course.title : "—"}
+                        </CardTitle>
+                      </CardHeader>
 
-                    <h3 className="font-[family-name:var(--font-syne)] text-sm font-semibold text-[#e8e8f0] leading-snug">
-                      {typeof course === "object" ? course.title : "—"}
-                    </h3>
-
-                    {typeof course === "object" && (
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80]">
-                        {course.schedule}
-                      </p>
-                    )}
-
-                    <div className="mt-auto pt-2 border-t border-[#1e1e2e]">
-                      {enr.status === "approved" ? (
-                        <Link
-                          href={`/my-courses/${enr._id}`}
-                          className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#4f8ef7] hover:opacity-80 transition-opacity"
-                        >
-                          View course →
-                        </Link>
-                      ) : (
-                        <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80]">
-                          {enr.status === "pending" ? "Awaiting approval" : "Enrollment rejected"}
-                        </span>
+                      {typeof course === "object" && (
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
+                            <Clock className="w-4 h-4 shrink-0" />
+                            {course.schedule}
+                          </p>
+                        </CardContent>
                       )}
-                    </div>
-                  </div>
+
+                      <CardFooter>
+                        {enr.status === "approved" ? (
+                          <span className="text-sm text-primary font-semibold flex items-center gap-1.5">
+                            View course <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground font-medium">
+                            {enr.status === "pending" ? "Awaiting approval" : "Enrollment rejected"}
+                          </span>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>
@@ -157,8 +141,8 @@ export default async function DashboardPage() {
         </div>
       </main>
 
-      <footer className="px-8 py-4 border-t border-[#1e1e2e]">
-        <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80]">
+      <footer className="px-8 py-6 border-t border-border">
+        <p className="text-xs text-muted-foreground font-medium">
           LMS Core v1.0 — Academic Edition
         </p>
       </footer>

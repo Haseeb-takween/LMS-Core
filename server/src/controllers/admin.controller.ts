@@ -43,17 +43,6 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
   res.status(200).json(response);
 }
 
-export async function listUsers(_req: Request, res: Response): Promise<void> {
-  const users = await User.find({ role: ROLES.USER }).sort({ createdAt: -1 });
-
-  const response: ApiResponse<typeof users> = {
-    success: true,
-    message: "Users retrieved",
-    data: users,
-  };
-  res.status(200).json(response);
-}
-
 export async function getStats(_req: Request, res: Response): Promise<void> {
   const [
     totalUsers,

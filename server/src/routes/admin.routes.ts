@@ -1,5 +1,5 @@
 import { Router, IRouter } from "express";
-import { adminLogin, listUsers, getStats } from "../controllers/admin.controller";
+import { adminLogin, getStats } from "../controllers/admin.controller";
 import {
   adminGetEnrollments,
   approveEnrollment,
@@ -23,24 +23,24 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
+const admin = [authenticate, requireAdmin] as const;
 
 router.post("/login", adminLogin);
-router.get("/users", authenticate, requireAdmin, listUsers);
-router.get("/stats", authenticate, requireAdmin, getStats);
+router.get("/stats", ...admin, getStats);
 
-router.get("/enrollments", authenticate, requireAdmin, adminGetEnrollments);
-router.patch("/enrollments/:id/approve", authenticate, requireAdmin, approveEnrollment);
-router.patch("/enrollments/:id/reject", authenticate, requireAdmin, rejectEnrollment);
+router.get("/enrollments", ...admin, adminGetEnrollments);
+router.patch("/enrollments/:id/approve", ...admin, approveEnrollment);
+router.patch("/enrollments/:id/reject", ...admin, rejectEnrollment);
 
-router.post("/attendance", authenticate, requireAdmin, markAttendance);
-router.patch("/attendance/:id", authenticate, requireAdmin, updateAttendance);
+router.post("/attendance", ...admin, markAttendance);
+router.patch("/attendance/:id", ...admin, updateAttendance);
+router.get("/attendance", ...admin, adminGetAttendance);
 
-router.get("/certificates", authenticate, requireAdmin, adminGetCertificates);
-router.patch("/certificates/:id/approve", authenticate, requireAdmin, approveCertificate);
-router.patch("/certificates/:id/reject", authenticate, requireAdmin, rejectCertificate);
+router.get("/certificates", ...admin, adminGetCertificates);
+router.patch("/certificates/:id/approve", ...admin, approveCertificate);
+router.patch("/certificates/:id/reject", ...admin, rejectCertificate);
 
-router.get("/courses/:courseId/roster", authenticate, requireAdmin, getCourseRoster);
-router.get("/attendance", authenticate, requireAdmin, adminGetAttendance);
-router.get("/quiz-results", authenticate, requireAdmin, adminGetQuizResults);
+router.get("/quiz-results", ...admin, adminGetQuizResults);
+router.get("/courses/:courseId/roster", ...admin, getCourseRoster);
 
 export default router;

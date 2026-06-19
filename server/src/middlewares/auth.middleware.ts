@@ -15,7 +15,8 @@ export function authenticate(
       throw new AppError(401, "Not authenticated — no token provided");
     }
 
-    req.user = verifyToken(token);
+    const payload = verifyToken(token);
+    req.user = payload;
     next();
   } catch (err) {
     if (err instanceof AppError) {
