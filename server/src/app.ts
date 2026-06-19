@@ -2,10 +2,13 @@ import express, { Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import env from "./config/env";
+import { getHealth } from "./controllers/health.controller";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
 import routes from "./routes";
 
 const app: Express = express();
+
+app.get("/", getHealth);
 
 app.use(
   cors({

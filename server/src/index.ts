@@ -5,8 +5,8 @@ import logger from "./utils/logger";
 
 connectDB()
   .then(() => {
-    const server = app.listen(env.PORT, () => {
-      logger.info(`Server running on http://${env.HOST}:${env.PORT} [${env.NODE_ENV}]`);
+    const server = app.listen(env.PORT, "0.0.0.0", () => {
+      logger.info(`Server running on port ${env.PORT} [${env.NODE_ENV}]`);
     });
 
     process.on("SIGTERM", () => {
