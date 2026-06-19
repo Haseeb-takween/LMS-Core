@@ -27,7 +27,7 @@ export default async function SessionDetailPage({
   const questions = session.quiz?.questions ?? [];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
+    <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">
       <Navbar user={user} />
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-8 py-10">

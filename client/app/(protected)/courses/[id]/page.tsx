@@ -28,7 +28,7 @@ export default async function CourseDetailPage({
   const isApproved = course.enrollmentStatus === "approved";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar user={user} />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 sm:px-8 py-10">

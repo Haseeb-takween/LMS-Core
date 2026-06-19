@@ -3,5 +3,5 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <main className="min-h-screen">{children}</main>;
+  return <main className="min-h-dvh">{children}</main>;
 }

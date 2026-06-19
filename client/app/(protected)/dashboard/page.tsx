@@ -24,13 +24,13 @@ export default async function DashboardPage() {
     s === "approved" ? "default" : s === "pending" ? "secondary" : "destructive";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar user={user} />
 
       <main className="flex-1 px-6 sm:px-8 py-10 max-w-5xl w-full mx-auto">
         <div className="mb-10 animate-fade-in-up">
           <p className="text-xs text-muted-foreground mb-2 tracking-widest uppercase font-semibold flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-primary animate-dot-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-primary animate-dot-pulse" aria-hidden="true" />
             Welcome back
           </p>
           <h1 className="font-[family-name:var(--font-syne)] text-5xl font-extrabold text-foreground tracking-tight leading-none">
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
             { label: "Pending", value: pending, icon: Clock, gradient: "from-amber-500/10 via-amber-500/5 to-transparent" },
             { label: "Approved", value: approved, icon: CheckCircle2, gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent" },
           ].map((stat, i) => (
-            <Card key={stat.label} className={`bg-gradient-to-br ${stat.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1}`}>
+            <Card key={stat.label} className={`bg-gradient-to-br ${stat.gradient} shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 card-glow animate-fade-in-up stagger-${i + 1}`}>
               <CardContent className="flex items-center justify-between py-6">
                 <div>
                   <span className="font-[family-name:var(--font-syne)] text-5xl font-extrabold text-foreground animate-count-up tracking-tight">
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
 
           {enrollments.length === 0 ? (
             <Link href="/courses" className="block">
-              <Card className="shadow-lg shadow-black/20 animate-fade-in-scale hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer">
+              <Card className="shadow-lg shadow-black/20 animate-fade-in-scale hover:shadow-xl hover:border-primary/30 transition-[transform,box-shadow,border-color] duration-300 cursor-pointer">
                 <CardContent className="py-12 text-center">
                   <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4 animate-dot-pulse" />
                   <p className="text-base text-muted-foreground mb-2 font-semibold">
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
                 return (
                   <Link key={enr._id} href={href} className="block">
                     <Card
-                      className={`shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1.5 group card-glow cursor-pointer h-full animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
+                      className={`shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 group card-glow cursor-pointer h-full animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between">

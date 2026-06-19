@@ -55,7 +55,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-dvh bg-background">
       <aside
         className="fixed left-0 top-0 h-full bg-card border-r border-border flex flex-col z-40 overflow-hidden shadow-2xl shadow-black/30 animate-slide-in-left"
         style={{
@@ -95,7 +95,8 @@ export default function AdminShell({ children, user }: AdminShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center h-12 transition-all duration-200 relative group/nav ${
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center h-12 transition-[background-color] duration-200 relative group/nav ${
                   active ? "bg-primary/5" : "hover:bg-secondary/30"
                 }`}
               >

@@ -64,7 +64,7 @@ export default function QuizResultsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-dvh bg-background flex items-center justify-center">
         <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-muted-foreground">Loading…</p>
       </div>
     );

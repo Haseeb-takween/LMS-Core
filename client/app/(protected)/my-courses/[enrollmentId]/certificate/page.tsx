@@ -30,7 +30,7 @@ export default async function CertificatePage({
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
+    <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">
       <Navbar user={user} />
 
       <main className="flex-1 max-w-2xl w-full mx-auto px-8 py-16 flex flex-col items-center justify-center">

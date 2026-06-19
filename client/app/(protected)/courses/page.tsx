@@ -19,7 +19,7 @@ export default async function CoursesPage() {
   const courses: Course[] = coursesRes.data ?? [];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <Navbar user={user} />
 
       <main className="flex-1 px-6 sm:px-8 py-10 max-w-6xl w-full mx-auto">
@@ -51,7 +51,7 @@ export default async function CoursesPage() {
             {courses.map((course, i) => (
               <Link key={course._id} href={`/courses/${course._id}`} className="block">
                 <Card
-                  className={`shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300 hover:-translate-y-1.5 group card-glow cursor-pointer h-full animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
+                  className={`shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 group card-glow cursor-pointer h-full animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export default async function CoursesPage() {
                   </CardContent>
 
                   <CardFooter>
-                    <div onClick={(e) => e.preventDefault()}>
+                    <div onClick={(e) => e.stopPropagation()}>
                       <EnrollButton
                         courseId={course._id}
                         initialStatus={course.enrollmentStatus ?? null}

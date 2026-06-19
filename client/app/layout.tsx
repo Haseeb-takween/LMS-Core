@@ -24,6 +24,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "LMS Core",
   description: "Learning Management System",
+  other: {
+    "theme-color": "#0a0a0f",
+  },
 };
 
 export default function RootLayout({

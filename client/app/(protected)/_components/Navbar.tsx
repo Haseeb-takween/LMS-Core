@@ -54,10 +54,10 @@ export default function Navbar({ user }: NavbarProps) {
       >
         {label}
         <span
-          className="absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300 rounded-full"
+          className="absolute bottom-0 left-0 h-[2px] bg-primary transition-[transform,box-shadow,border-color,color] duration-300 rounded-full"
           style={{ width: active ? "100%" : "0%", opacity: active ? 1 : 0 }}
         />
-        <span className="absolute bottom-0 left-0 h-[2px] bg-primary/40 transition-all duration-300 rounded-full group-hover/nav:w-full group-hover/nav:opacity-100"
+        <span className="absolute bottom-0 left-0 h-[2px] bg-primary/40 transition-[width,opacity] duration-300 rounded-full group-hover/nav:w-full group-hover/nav:opacity-100"
           style={{ width: "0%", opacity: 0 }}
         />
       </Link>
@@ -86,6 +86,8 @@ export default function Navbar({ user }: NavbarProps) {
           <div ref={dropdownRef} className="relative flex items-center">
             <button
               onClick={openDropdown}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
               className={`text-sm font-bold tracking-wide transition-colors duration-200 flex items-center gap-1.5 ${
                 pathname.startsWith("/my-courses") ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -139,7 +141,7 @@ export default function Navbar({ user }: NavbarProps) {
         </span>
         <button
           onClick={handleLogout}
-          className="text-sm font-bold tracking-wide text-muted-foreground border border-border rounded-lg px-5 py-2.5 hover:border-primary hover:text-primary transition-all duration-300 flex items-center gap-2 hover:shadow-md hover:shadow-primary/10 btn-press"
+          className="text-sm font-bold tracking-wide text-muted-foreground border border-border rounded-lg px-5 py-2.5 hover:border-primary hover:text-primary transition-[transform,box-shadow,border-color,color] duration-300 flex items-center gap-2 hover:shadow-md hover:shadow-primary/10 btn-press"
         >
           <LogOut className="w-4 h-4" />
           Sign out

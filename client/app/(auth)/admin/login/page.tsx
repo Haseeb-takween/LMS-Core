@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
     "w-full bg-transparent px-0 py-2.5 text-sm outline-none transition-colors duration-200 placeholder-[#3a3a50]";
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0f]">
+    <div className="min-h-dvh flex bg-[#0a0a0f]">
       {/* ── Left decorative panel ── */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-14 relative overflow-hidden bg-[#12121a] border-r border-[#1e1e2e]">
         {/* Grid texture */}
