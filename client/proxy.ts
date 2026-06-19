@@ -30,7 +30,11 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/register") ||
     pathname.startsWith("/admin/login");
 
-  const isDashboard = pathname.startsWith("/dashboard");
+  const isStudentPage =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/courses") ||
+    pathname.startsWith("/my-courses");
+
   const isAdminPage =
     pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
 
@@ -40,8 +44,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
-  // Protect dashboard — must be logged in
-  if (isDashboard && !user) {
+  // Protect student pages — must be logged in
+  if (isStudentPage && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

@@ -31,5 +31,15 @@ export async function getServerApi() {
     return res.json() as Promise<ApiResponse<T>>;
   }
 
-  return { get, post };
+  async function patch<T>(path: string, body: unknown): Promise<ApiResponse<T>> {
+    const res = await fetch(`${API_URL}/api/v1${path}`, {
+      method: "PATCH",
+      headers: baseHeaders,
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    return res.json() as Promise<ApiResponse<T>>;
+  }
+
+  return { get, post, patch };
 }

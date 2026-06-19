@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import User from "../models/User.model";
+import Course from "../models/Course.model";
+import Enrollment from "../models/Enrollment.model";
+import Certificate from "../models/Certificate.model";
 import { comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { COOKIE_NAME, cookieOptions, ROLES } from "../constants/auth";
@@ -52,25 +55,34 @@ export async function listUsers(_req: Request, res: Response): Promise<void> {
 }
 
 export async function getStats(_req: Request, res: Response): Promise<void> {
-  const [totalUsers, totalAdmins, latestUser] = await Promise.all([
+  const [
+    totalUsers,
+    totalAdmins,
+    latestUser,
+    totalCourses,
+    pendingEnrollments,
+    pendingCertificates,
+  ] = await Promise.all([
     User.countDocuments({ role: ROLES.USER }),
     User.countDocuments({ role: ROLES.ADMIN }),
     User.findOne({ role: ROLES.USER })
       .sort({ createdAt: -1 })
       .select("name email createdAt"),
+    Course.countDocuments({ isActive: true }),
+    Enrollment.countDocuments({ status: "pending" }),
+    Certificate.countDocuments({ status: "pending_approval" }),
   ]);
 
-  const response: ApiResponse<{
-    totalUsers: number;
-    totalAdmins: number;
-    latestJoin: string | null;
-  }> = {
+  const response: ApiResponse = {
     success: true,
     message: "Stats retrieved",
     data: {
       totalUsers,
       totalAdmins,
       latestJoin: latestUser ? latestUser.createdAt.toISOString() : null,
+      totalCourses,
+      pendingEnrollments,
+      pendingCertificates,
     },
   };
   res.status(200).json(response);
