@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,28 +13,35 @@ interface Enrollment {
   requestedAt: string;
 }
 
-interface EnrollmentTableProps {
-  initialEnrollments: Enrollment[];
-  initialFilter: string;
-}
-
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
 
 const statusVariant = (s: string) =>
   s === "approved" ? "default" as const : s === "pending" ? "secondary" as const : "destructive" as const;
 
-export default function EnrollmentTable({ initialEnrollments, initialFilter }: EnrollmentTableProps) {
-  const [filter, setFilter] = useState(initialFilter);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>(initialEnrollments);
+export default function EnrollmentTable() {
+  const [filter, setFilter] = useState("all");
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [removing, setRemoving] = useState<Set<string>>(new Set());
+  const [fetching, setFetching] = useState(true);
+  const [slowLoad, setSlowLoad] = useState(false);
 
   async function fetchFiltered(f: string) {
     setFilter(f);
+    setFetching(true);
     const path = f === "all" ? "/admin/enrollments" : `/admin/enrollments?status=${f}`;
     const res = await api.get<Enrollment[]>(path);
     if (res.success && res.data) setEnrollments(res.data);
+    setFetching(false);
+    setSlowLoad(false);
   }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchFiltered("all");
+    const timer = setTimeout(() => setSlowLoad(true), 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
   async function handleAction(id: string, action: "approve" | "reject") {
     setLoading((p) => ({ ...p, [id]: true }));
@@ -69,7 +76,18 @@ export default function EnrollmentTable({ initialEnrollments, initialFilter }: E
         ))}
       </div>
 
-      {visible.length === 0 ? (
+      {fetching ? (
+        <Card className="shadow-lg shadow-black/20 animate-fade-in-scale">
+          <CardContent className="py-10 text-center">
+            <p className="text-sm text-muted-foreground font-medium">Loading…</p>
+            {slowLoad && (
+              <p className="text-xs text-muted-foreground/50 mt-2">
+                Backend is starting up — this may take ~30s on first visit.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : visible.length === 0 ? (
         <Card className="shadow-lg shadow-black/20 animate-fade-in-scale">
           <CardContent className="py-10 text-center">
             <p className="text-sm text-muted-foreground font-medium">

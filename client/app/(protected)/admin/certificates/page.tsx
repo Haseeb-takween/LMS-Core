@@ -1,37 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import CertificateTable from "./CertificateTable";
-
-interface Certificate {
-  _id: string;
-  studentId: { _id: string; name: string; email: string };
-  courseId: { _id: string; title: string; schedule: string };
-  status: "pending_approval" | "approved" | "rejected";
-  attendancePercent: number;
-  quizAverage: number;
-  createdAt: string;
-  rejectionReason?: string;
-}
 
 export default function CertificatesPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   useEffect(() => {
     if (user && user.role !== "admin") router.replace("/dashboard");
   }, [user, router]);
-
-  useEffect(() => {
-    api.get<Certificate[]>("/admin/certificates").then((res) => {
-      if (res.success && res.data) setCertificates(res.data);
-    });
-  }, []);
 
   if (!user || user.role !== "admin") return null;
 
@@ -47,7 +28,7 @@ export default function CertificatesPage() {
           </h1>
         </div>
 
-        <CertificateTable initialCertificates={certificates} />
+        <CertificateTable />
       </main>
 
       <footer className="px-8 py-4 border-t border-border">

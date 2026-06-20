@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,10 +16,6 @@ interface Certificate {
   rejectionReason?: string;
 }
 
-interface CertificateTableProps {
-  initialCertificates: Certificate[];
-}
-
 const FILTERS = [
   { key: "all",              label: "All"     },
   { key: "pending_approval", label: "Pending" },
@@ -30,20 +26,32 @@ const FILTERS = [
 const statusVariant = (s: string) =>
   s === "approved" ? "default" as const : s === "pending_approval" ? "secondary" as const : "destructive" as const;
 
-export default function CertificateTable({ initialCertificates }: CertificateTableProps) {
+export default function CertificateTable() {
   const [filter, setFilter] = useState("all");
-  const [certs, setCerts] = useState<Certificate[]>(initialCertificates);
+  const [certs, setCerts] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [expanded, setExpanded] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [removing, setRemoving] = useState<Set<string>>(new Set());
+  const [fetching, setFetching] = useState(true);
+  const [slowLoad, setSlowLoad] = useState(false);
 
   async function fetchFiltered(f: string) {
     setFilter(f);
+    setFetching(true);
     const path = f === "all" ? "/admin/certificates" : `/admin/certificates?status=${f}`;
     const res = await api.get<Certificate[]>(path);
     if (res.success && res.data) setCerts(res.data);
+    setFetching(false);
+    setSlowLoad(false);
   }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchFiltered("all");
+    const timer = setTimeout(() => setSlowLoad(true), 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
   async function handleApprove(id: string) {
     setLoading((p) => ({ ...p, [id]: true }));
@@ -95,7 +103,18 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
         ))}
       </div>
 
-      {visible.length === 0 ? (
+      {fetching ? (
+        <Card className="shadow-lg shadow-black/20">
+          <CardContent className="py-10 text-center">
+            <p className="font-[family-name:var(--font-ibm-plex-mono)] text-xs text-muted-foreground">Loading…</p>
+            {slowLoad && (
+              <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-muted-foreground/50 mt-2">
+                Backend is starting up — this may take ~30s on first visit.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : visible.length === 0 ? (
         <Card className="shadow-lg shadow-black/20">
           <CardContent className="py-10 text-center">
             <p className="font-[family-name:var(--font-ibm-plex-mono)] text-xs text-muted-foreground">

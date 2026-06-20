@@ -1,34 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { api } from "@/lib/api";
 import AdminShell from "../_components/AdminShell";
 import EnrollmentTable from "./EnrollmentTable";
-
-interface Enrollment {
-  _id: string;
-  studentId: { _id: string; name: string; email: string };
-  courseId: { _id: string; title: string; schedule: string };
-  status: "pending" | "approved" | "rejected";
-  requestedAt: string;
-}
 
 export default function EnrollmentsPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
 
   useEffect(() => {
     if (user && user.role !== "admin") router.replace("/dashboard");
   }, [user, router]);
-
-  useEffect(() => {
-    api.get<Enrollment[]>("/admin/enrollments").then((res) => {
-      if (res.success && res.data) setEnrollments(res.data);
-    });
-  }, []);
 
   if (!user || user.role !== "admin") return null;
 
@@ -44,7 +28,7 @@ export default function EnrollmentsPage() {
           </h1>
         </div>
 
-        <EnrollmentTable initialEnrollments={enrollments} initialFilter="all" />
+        <EnrollmentTable />
       </main>
 
       <footer className="px-8 py-4 border-t border-border">
