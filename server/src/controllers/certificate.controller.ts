@@ -6,6 +6,7 @@ import Enrollment from "../models/Enrollment.model";
 import Session from "../models/Session.model";
 import Attendance from "../models/Attendance.model";
 import QuizSubmission from "../models/QuizSubmission.model";
+import Quiz from "../models/Quiz.model";
 import User from "../models/User.model";
 import Course from "../models/Course.model";
 import { AppError } from "../middlewares/errorHandler";
@@ -54,14 +55,27 @@ export async function getEnrollmentCertificate(
     QuizSubmission.find({ enrollmentId }),
   ]);
 
+  const quizSessions = await Quiz.find(
+    { sessionId: { $in: sessions.map((s) => s._id) } },
+    "sessionId"
+  );
+
   const attended = attendanceRecords.filter((a) => a.status === "attended").length;
   const attendancePercent =
     sessions.length > 0 ? Math.round((attended / sessions.length) * 100) : 0;
 
+  const totalQuizzable = quizSessions.length;
+  const submittedSessionIds = new Set(submissions.map((s) => String(s.sessionId)));
+  const quizzesSubmitted = quizSessions.filter((q) =>
+    submittedSessionIds.has(String(q.sessionId))
+  ).length;
+
   const totalCorrect = submissions.reduce((s, q) => s + q.mcScore, 0);
   const totalGraded = submissions.reduce((s, q) => s + q.mcTotal, 0);
   const quizAverage =
-    totalGraded === 0 ? 100 : Math.round((totalCorrect / totalGraded) * 100);
+    totalQuizzable === 0 ? 100
+    : totalGraded === 0 ? 0
+    : Math.round((totalCorrect / totalGraded) * 100);
 
   const response: ApiResponse = {
     success: true,
@@ -70,6 +84,8 @@ export async function getEnrollmentCertificate(
       status: "not_eligible",
       attendancePercent,
       quizAverage,
+      quizzesSubmitted,
+      totalQuizzable,
       attendanceThreshold: 80,
       quizThreshold: 70,
     },

@@ -39,6 +39,12 @@ export async function getEnrollmentSessions(
     QuizSubmission.find({ enrollmentId }),
   ]);
 
+  const quizSessions = await Quiz.find(
+    { sessionId: { $in: sessions.map((s) => s._id) } },
+    "sessionId"
+  );
+  const quizSessionIdSet = new Set(quizSessions.map((q) => String(q.sessionId)));
+
   const attendanceMap = new Map(
     attendanceRecords.map((a) => [String(a.sessionId), a.status])
   );
@@ -50,18 +56,25 @@ export async function getEnrollmentSessions(
   );
 
   const data = sessions.map((s) => {
-    const submission = submissionMap.get(String(s._id));
+    const sid = String(s._id);
+    const submission = submissionMap.get(sid);
+    const hasQuiz = quizSessionIdSet.has(sid);
     return {
       _id: s._id,
       lessonNumber: s.lessonNumber,
       title: s.title,
       description: s.description,
       order: s.order,
-      attendanceStatus: attendanceMap.get(String(s._id)) ?? null,
-      quizSubmitted: !!submission,
-      quizScore: submission
-        ? { mcScore: submission.mcScore, mcTotal: submission.mcTotal }
-        : null,
+      attendanceStatus: attendanceMap.get(sid) ?? null,
+      // Only include quiz fields when a quiz exists for this session
+      ...(hasQuiz
+        ? {
+            quizSubmitted: !!submission,
+            quizScore: submission
+              ? { mcScore: submission.mcScore, mcTotal: submission.mcTotal }
+              : null,
+          }
+        : {}),
     };
   });
 

@@ -76,6 +76,8 @@ export interface CertificateData {
   status: "not_eligible" | "pending_approval" | "approved" | "rejected";
   attendancePercent: number;
   quizAverage: number;
+  quizzesSubmitted?: number;
+  totalQuizzable?: number;
   rejectionReason?: string;
   approvedAt?: string;
   attendanceThreshold?: number;

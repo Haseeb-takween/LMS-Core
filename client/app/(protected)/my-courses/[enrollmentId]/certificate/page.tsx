@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { api, type CertificateData, type Session, RAW_API_URL } from "@/lib/api";
+import { api, type CertificateData, RAW_API_URL } from "@/lib/api";
 import Navbar from "../../../_components/Navbar";
 import AnimatedBar from "../../../_components/AnimatedBar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,27 +14,16 @@ export default function CertificatePage() {
   const { enrollmentId } = useParams<{ enrollmentId: string }>();
   const router = useRouter();
   const [cert, setCert] = useState<CertificateData | null>(null);
-  const [sessions, setSessions] = useState<Session[]>([]);
 
   useEffect(() => {
-    Promise.all([
-      api.get<CertificateData>(`/enrollments/${enrollmentId}/certificate`),
-      api.get<Session[]>(`/enrollments/${enrollmentId}/sessions`),
-    ]).then(([certRes, sessionsRes]) => {
-      if (!certRes.success || !certRes.data) {
+    api.get<CertificateData>(`/enrollments/${enrollmentId}/certificate`).then((res) => {
+      if (res.success && res.data) {
+        setCert(res.data);
+      } else {
         router.replace(`/my-courses/${enrollmentId}`);
-        return;
-      }
-      setCert(certRes.data);
-      if (sessionsRes.success && sessionsRes.data) {
-        setSessions(sessionsRes.data);
       }
     });
   }, [enrollmentId, router]);
-
-  const quizzableSessions = sessions.filter((s) => s.quizScore !== undefined);
-  const completedQuizzes = sessions.filter((s) => s.quizScore !== null && s.quizScore !== undefined).length;
-  const totalQuizzable = quizzableSessions.length;
 
   if (!user) return null;
 
@@ -111,7 +100,7 @@ export default function CertificatePage() {
               />
             </div>
 
-            {totalQuizzable > 0 && (
+            {(cert.totalQuizzable ?? 0) > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-widest uppercase text-[#6b6b80]">
@@ -119,14 +108,16 @@ export default function CertificatePage() {
                   </span>
                   <span
                     className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px]"
-                    style={{ color: completedQuizzes === totalQuizzable ? "#e8e8f0" : "#d97706" }}
+                    style={{
+                      color: cert.quizzesSubmitted === cert.totalQuizzable ? "#e8e8f0" : "#d97706",
+                    }}
                   >
-                    {completedQuizzes} / {totalQuizzable} — all required
+                    {cert.quizzesSubmitted ?? 0} / {cert.totalQuizzable} — all required
                   </span>
                 </div>
                 <AnimatedBar
-                  percent={Math.round((completedQuizzes / totalQuizzable) * 100)}
-                  color={completedQuizzes === totalQuizzable ? "#1d4ed8" : "#d97706"}
+                  percent={Math.round(((cert.quizzesSubmitted ?? 0) / (cert.totalQuizzable ?? 1)) * 100)}
+                  color={cert.quizzesSubmitted === cert.totalQuizzable ? "#1d4ed8" : "#d97706"}
                   height="4px"
                 />
               </div>

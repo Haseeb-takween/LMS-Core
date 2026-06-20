@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api, AuthUser } from "@/lib/api";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
-export default function LoginPage() {
-  const router = useRouter();
+function SessionExpiredBanner() {
   const searchParams = useSearchParams();
-  const sessionExpired = searchParams.get("reason") === "expired";
+  if (searchParams.get("reason") !== "expired") return null;
+  return (
+    <div role="alert" className="mb-6 text-sm px-4 py-3 bg-amber-500/5 border-l-2 border-amber-500 text-amber-500 rounded-r-lg font-semibold animate-fade-in-down">
+      Your session has expired — please sign in again.
+    </div>
+  );
+}
+
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -106,11 +113,9 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {sessionExpired && (
-            <div role="alert" className="mb-6 text-sm px-4 py-3 bg-amber-500/5 border-l-2 border-amber-500 text-amber-500 rounded-r-lg font-semibold animate-fade-in-down">
-              Your session has expired — please sign in again.
-            </div>
-          )}
+          <Suspense fallback={null}>
+            <SessionExpiredBanner />
+          </Suspense>
 
           <form onSubmit={handleSubmit} className="space-y-8" noValidate>
             <div className="animate-fade-in-up stagger-2">
