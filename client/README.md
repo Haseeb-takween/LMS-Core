@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LMS Core — Frontend
 
-## Getting Started
+Next.js client for LMS Core. Student dashboard, course catalog, enrollments, quizzes, certificates, and an admin panel. Talks to the [API server](../server/README.md) over REST with cookie-based auth.
 
-First, run the development server:
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 20+
+- [pnpm](https://pnpm.io/) 10+
+- API server running (default: `http://localhost:5000`)
+
+## Quick start (local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd client
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start the API server first (see [server README](../server/README.md)), seed admin + courses, then:
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Description |
+|-------|-------------|
+| `/login` | Student login |
+| `/register` | Student registration |
+| `/admin/login` | Admin login |
+| `/dashboard` | Student home |
+| `/courses` | Course catalog |
+| `/admin` | Admin dashboard |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve production build |
+| `pnpm lint` | Run ESLint |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create `.env.local` (not committed to git):
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Yes | API base URL **without** `/api/v1`, e.g. `http://localhost:5000` |
+
+The client appends `/api/v1` in `lib/api.ts`. Do not include the path suffix in the env var.
+
+### Production example
+
+```env
+NEXT_PUBLIC_API_URL=https://lms-core-backend.onrender.com
+```
+
+On the **API server**, set `CLIENT_URL` to your frontend URL, e.g. `https://lms-core-frontend.onrender.com`.
+
+## Architecture
+
+- **App Router** (`app/`) with route groups: `(auth)`, `(protected)`
+- **Client-side data fetching** via `lib/api.ts` (`fetch` + `credentials: "include"`)
+- **Auth state** in `lib/auth-context.tsx` — calls `/auth/me` on protected routes
+- **UI**: Tailwind CSS 4, shadcn/ui components
+
+Protected pages show a loading spinner until auth completes, then fetch page data in `useEffect`.
+
+## Deploy on Render
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `client` |
+| Build Command | `pnpm install && pnpm build` |
+| Start Command | `pnpm start` |
+
+Environment variables:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-api.onrender.com
+```
+
+Redeploy after changing `NEXT_PUBLIC_API_URL` (it is baked in at build time).
+
+### Two-service setup
+
+Typical production layout:
+
+| Service | Example URL |
+|---------|-------------|
+| Frontend | `https://lms-core-frontend.onrender.com` |
+| Backend | `https://lms-core-backend.onrender.com` |
+
+Cross-origin checklist:
+
+1. Frontend `NEXT_PUBLIC_API_URL` → backend URL
+2. Backend `CLIENT_URL` → frontend URL (exact match, `https`, no trailing slash)
+3. Backend `JWT_SECRET` set and consistent if using JWT middleware
+4. MongoDB Atlas allows Render IPs (`0.0.0.0/0`)
+5. Seed admin + courses against production `MONGO_URI` from your machine (see server README)
+
+## Project structure
+
+```
+client/
+├── app/
+│   ├── (auth)/           # login, register, admin login
+│   ├── (protected)/      # dashboard, courses, admin panel
+│   ├── layout.tsx
+│   └── globals.css
+├── components/ui/        # shadcn components
+├── lib/
+│   ├── api.ts            # client API helper
+│   ├── api-server.ts     # server-side fetch (legacy)
+│   └── auth-context.tsx
+└── proxy.ts              # Next.js middleware hook (pass-through)
+```
+
+## Troubleshooting
+
+| Issue | Likely cause |
+|-------|----------------|
+| Login succeeds but redirect back to login | Auth cookie on API domain; check CORS + `CLIENT_URL` |
+| Stuck on loading spinner | `/auth/me` failing — check `NEXT_PUBLIC_API_URL` and API health |
+| `OPTIONS` → 204 in Network tab | Normal CORS preflight, not an error |
+| Admin page crashes (`null reading 'name'`) | Orphan enrollment data — reset DB and re-seed (server README) |
+| Slow first load | Render free tier cold start on API; auth + page data load sequentially |
+| Blank page after spinner | Page waiting on second API call; check Network for failed GET requests |
+
+## Learn more
+
+- [Next.js documentation](https://nextjs.org/docs)
+- [API server README](../server/README.md)
