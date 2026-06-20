@@ -14,6 +14,7 @@ export default function CertificatePage() {
   const { enrollmentId } = useParams<{ enrollmentId: string }>();
   const router = useRouter();
   const [cert, setCert] = useState<CertificateData | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     api.get<CertificateData>(`/enrollments/${enrollmentId}/certificate`).then((res) => {
@@ -189,14 +190,34 @@ export default function CertificatePage() {
                 <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#1d4ed8]">{cert.quizAverage}%</p>
               </div>
             </div>
-            <a
-              href={`${RAW_API_URL}/api/v1/enrollments/${enrollmentId}/certificate/download`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="self-start font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-[0.2em] uppercase px-6 py-3 bg-[#1d4ed8] text-white hover:opacity-90 transition-opacity"
+            <button
+              onClick={async () => {
+                try {
+                  setDownloading(true);
+                  const res = await fetch(
+                    `${RAW_API_URL}/api/v1/enrollments/${enrollmentId}/certificate/download`,
+                    { credentials: "include" }
+                  );
+                  if (!res.ok) throw new Error("Download failed");
+                  const blob = await res.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = "certificate.pdf";
+                  link.click();
+                  window.URL.revokeObjectURL(url);
+                } catch (err) {
+                  console.error("Download error:", err);
+                  alert("Failed to download certificate");
+                } finally {
+                  setDownloading(false);
+                }
+              }}
+              disabled={downloading}
+              className="self-start font-[family-name:var(--font-ibm-plex-mono)] text-[10px] tracking-[0.2em] uppercase px-6 py-3 bg-[#1d4ed8] text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Download PDF →
-            </a>
+              {downloading ? "Downloading…" : "Download PDF →"}
+            </button>
           </div>
         )}
 
