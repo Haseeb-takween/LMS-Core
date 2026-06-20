@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import AdminShell from "../../../_components/AdminShell";
 import RosterGrid from "./RosterGrid";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RosterData {
   course: { _id: string; title: string; schedule: string };
@@ -39,7 +40,19 @@ export default function RosterPage() {
     });
   }, [courseId, router]);
 
-  if (!user || user.role !== "admin" || !roster) return null;
+  if (!user || user.role !== "admin") return null;
+
+  if (!roster) return (
+    <AdminShell user={user}>
+      <main className="flex-1 px-8 py-10 max-w-6xl w-full mx-auto">
+        <Skeleton className="h-3 w-16 mb-4 bg-white/5" />
+        <Skeleton className="h-3 w-32 mb-2 bg-white/5" />
+        <Skeleton className="h-9 w-64 mb-1 bg-white/5" />
+        <Skeleton className="h-3 w-40 mb-8 bg-white/5" />
+        <Skeleton className="h-72 bg-white/5" />
+      </main>
+    </AdminShell>
+  );
 
   const { course, sessions, students } = roster;
 

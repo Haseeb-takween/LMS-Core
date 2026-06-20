@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import AdminShell from "./_components/AdminShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Clock, BookOpen, Award, ClipboardList, CalendarCheck, FileQuestion, ArrowRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AdminStats {
   totalUsers: number;
@@ -44,7 +45,25 @@ export default function AdminPage() {
     });
   }, []);
 
-  if (!user || user.role !== "admin" || !stats) return null;
+  if (!user || user.role !== "admin") return null;
+
+  if (!stats) return (
+    <AdminShell user={user}>
+      <main className="flex-1 px-6 sm:px-8 py-10 max-w-5xl w-full mx-auto">
+        <div className="mb-10">
+          <Skeleton className="h-3 w-20 mb-3" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28" />)}
+        </div>
+        <Skeleton className="h-6 w-36 mb-4" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16" />)}
+        </div>
+      </main>
+    </AdminShell>
+  );
 
   const statCards = [
     { label: "Total Students", value: stats.totalUsers, icon: Users, gradient: "from-blue-500/10 via-blue-500/5 to-transparent", accent: false, href: null as string | null },

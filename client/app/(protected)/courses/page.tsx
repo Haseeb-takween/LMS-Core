@@ -8,18 +8,34 @@ import Navbar from "../_components/Navbar";
 import EnrollButton from "./EnrollButton";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { BookOpen, Calendar } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CoursesPage() {
   const { user } = useAuth();
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[] | null>(null);
 
   useEffect(() => {
     api.get<Course[]>("/courses").then((res) => {
-      if (res.success && res.data) setCourses(res.data);
+      setCourses(res.success && res.data ? res.data : []);
     });
   }, []);
 
   if (!user) return null;
+
+  if (!courses) return (
+    <div className="min-h-dvh bg-background flex flex-col">
+      <Navbar user={user} />
+      <main className="flex-1 px-6 sm:px-8 py-10 max-w-6xl w-full mx-auto">
+        <div className="mb-10">
+          <Skeleton className="h-3 w-20 mb-3" />
+          <Skeleton className="h-10 w-56" />
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-52" />)}
+        </div>
+      </main>
+    </div>
+  );
 
   return (
     <div className="min-h-dvh bg-background flex flex-col">

@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { api, type CertificateData, RAW_API_URL } from "@/lib/api";
 import Navbar from "../../../_components/Navbar";
 import AnimatedBar from "../../../_components/AnimatedBar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CertificatePage() {
   const { user } = useAuth();
@@ -24,7 +25,18 @@ export default function CertificatePage() {
     });
   }, [enrollmentId, router]);
 
-  if (!user || !cert) return null;
+  if (!user) return null;
+
+  if (!cert) return (
+    <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">
+      <Navbar user={user} />
+      <main className="flex-1 max-w-2xl w-full mx-auto px-8 py-16 flex flex-col">
+        <Skeleton className="h-3 w-16 mb-8 bg-white/5" />
+        <Skeleton className="h-7 w-32 mb-8 bg-white/5" />
+        <Skeleton className="h-48 bg-white/5" />
+      </main>
+    </div>
+  );
 
   return (
     <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">

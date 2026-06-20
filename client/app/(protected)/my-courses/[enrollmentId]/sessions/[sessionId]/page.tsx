@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { api, type SessionDetail } from "@/lib/api";
 import Navbar from "../../../../_components/Navbar";
 import QuizForm from "./QuizForm";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SessionDetailPage() {
   const { user } = useAuth();
@@ -24,7 +25,22 @@ export default function SessionDetailPage() {
     });
   }, [enrollmentId, sessionId, router]);
 
-  if (!user || !session) return null;
+  if (!user) return null;
+
+  if (!session) return (
+    <div className="min-h-dvh bg-[#0a0a0f] flex flex-col">
+      <Navbar user={user} />
+      <main className="flex-1 max-w-3xl w-full mx-auto px-8 py-10">
+        <Skeleton className="h-3 w-32 mb-8 bg-white/5" />
+        <Skeleton className="h-3 w-24 mb-3 bg-white/5" />
+        <Skeleton className="h-8 w-3/4 mb-2 bg-white/5" />
+        <Skeleton className="h-16 w-full mb-8 bg-white/5" />
+        <div className="flex flex-col gap-4">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 bg-white/5" />)}
+        </div>
+      </main>
+    </div>
+  );
 
   const submitted = !!session.submission;
   const questions = session.quiz?.questions ?? [];

@@ -9,6 +9,7 @@ import Navbar from "../../_components/Navbar";
 import EnrollButton from "../EnrollButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, Calendar, Lock, Circle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CourseDetailPage() {
   const { user } = useAuth();
@@ -26,7 +27,28 @@ export default function CourseDetailPage() {
     });
   }, [id, router]);
 
-  if (!user || !course) return null;
+  if (!user) return null;
+
+  if (!course) return (
+    <div className="min-h-dvh bg-background flex flex-col">
+      <Navbar user={user} />
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 sm:px-8 py-10">
+        <Skeleton className="h-3 w-32 mb-8" />
+        <div className="flex gap-8 flex-col lg:flex-row">
+          <div className="flex-[3] flex flex-col gap-4">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+          </div>
+          <div className="flex-[2]">
+            <Skeleton className="h-64" />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 
   const sessions = course.sessions ?? [];
   const isApproved = course.enrollmentStatus === "approved";

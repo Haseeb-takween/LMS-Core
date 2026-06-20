@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { api, type Enrollment, type Course } from "@/lib/api";
+import { type Course } from "@/lib/api";
 import Navbar from "../_components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,14 +12,7 @@ const statusVariant = (s: string) =>
   s === "approved" ? "default" : s === "pending" ? "secondary" : "destructive";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-
-  useEffect(() => {
-    api.get<Enrollment[]>("/enrollments/my").then((res) => {
-      if (res.success && res.data) setEnrollments(res.data);
-    });
-  }, []);
+  const { user, enrollments } = useAuth();
 
   if (!user) return null;
 

@@ -9,6 +9,7 @@ import Navbar from "../../_components/Navbar";
 import AnimatedBar from "../../_components/AnimatedBar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Award, BarChart3, CalendarCheck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SessionRow extends Session {
   quizScore?: { mcScore: number; mcTotal: number } | null;
@@ -45,7 +46,24 @@ export default function MyCourseDetailPage() {
     });
   }, [enrollmentId, router]);
 
-  if (!user || !data) return null;
+  if (!user) return null;
+
+  if (!data) return (
+    <div className="min-h-dvh bg-background flex flex-col">
+      <Navbar user={user} />
+      <main className="flex-1 max-w-5xl w-full mx-auto px-6 sm:px-8 py-10">
+        <Skeleton className="h-3 w-20 mb-4" />
+        <Skeleton className="h-10 w-64 mb-1" />
+        <Skeleton className="h-3 w-40 mb-8" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-3 w-24 mb-5" />
+        <Skeleton className="h-64" />
+      </main>
+    </div>
+  );
 
   const { enrollment, sessions, attendancePercent } = data;
   const course = enrollment.courseId as Course;

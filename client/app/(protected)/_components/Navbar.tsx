@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { api, type Enrollment, type Course } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { type Course } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 
 interface NavbarProps {
   user: { name: string; email: string; role: string };
@@ -13,25 +14,9 @@ interface NavbarProps {
 
 export default function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
+  const { enrollments, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  async function handleLogout() {
-    await api.post("/auth/logout", {});
-    window.location.href = "/login";
-  }
-
-  async function openDropdown() {
-    setDropdownOpen((v) => !v);
-    if (enrollments.length === 0 && !loadingEnrollments) {
-      setLoadingEnrollments(true);
-      const res = await api.get<Enrollment[]>("/enrollments/my");
-      if (res.success && res.data) setEnrollments(res.data);
-      setLoadingEnrollments(false);
-    }
-  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -85,7 +70,7 @@ export default function Navbar({ user }: NavbarProps) {
 
           <div ref={dropdownRef} className="relative flex items-center">
             <button
-              onClick={openDropdown}
+              onClick={() => setDropdownOpen((v) => !v)}
               aria-expanded={dropdownOpen}
               aria-haspopup="true"
               className={`text-sm font-bold tracking-wide transition-colors duration-200 flex items-center gap-1.5 ${
@@ -100,12 +85,7 @@ export default function Navbar({ user }: NavbarProps) {
 
             {dropdownOpen && (
               <div className="absolute top-full left-0 mt-2 min-w-[260px] bg-card rounded-xl border border-border z-50 shadow-2xl shadow-black/40 overflow-hidden animate-fade-in-down">
-                {loadingEnrollments ? (
-                  <div className="px-4 py-4 flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground font-medium">Loading…</span>
-                  </div>
-                ) : enrollments.length === 0 ? (
+                {enrollments.length === 0 ? (
                   <div className="px-4 py-4 text-sm text-muted-foreground font-medium">
                     No enrollments yet
                   </div>
@@ -140,7 +120,7 @@ export default function Navbar({ user }: NavbarProps) {
           {user.name}
         </span>
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className="text-sm font-bold tracking-wide text-muted-foreground border border-border rounded-lg px-5 py-2.5 hover:border-primary hover:text-primary transition-[transform,box-shadow,border-color,color] duration-300 flex items-center gap-2 hover:shadow-md hover:shadow-primary/10 btn-press"
         >
           <LogOut className="w-4 h-4" />
