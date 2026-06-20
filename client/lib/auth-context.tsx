@@ -56,27 +56,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
 
-    Promise.all([
-      api.get<AuthUser>("/auth/me"),
-      api.get<Enrollment[]>("/enrollments/my"),
-    ]).then(([authRes, enrollRes]) => {
-      if (!authRes.success || !authRes.data) {
+    api.get<AuthUser>("/auth/me")
+      .then(async (authRes) => {
+        if (!authRes.success || !authRes.data) {
+          writeCache(USER_KEY, null);
+          writeCache(ENROLLMENTS_KEY, null);
+          router.replace("/login");
+          return;
+        }
+
+        const freshUser = authRes.data;
+        setUser(freshUser);
+        writeCache(USER_KEY, freshUser);
+
+        if (freshUser.role === "user") {
+          const enrollRes = await api.get<Enrollment[]>("/enrollments/my").catch(() => null);
+          if (enrollRes?.success && enrollRes.data) {
+            setEnrollments(enrollRes.data);
+            writeCache(ENROLLMENTS_KEY, enrollRes.data);
+          }
+        }
+
+        if (!cachedUser) setLoading(false);
+      })
+      .catch(() => {
         writeCache(USER_KEY, null);
         writeCache(ENROLLMENTS_KEY, null);
+        if (!cachedUser) setLoading(false);
         router.replace("/login");
-        return;
-      }
-
-      setUser(authRes.data);
-      writeCache(USER_KEY, authRes.data);
-
-      if (enrollRes.success && enrollRes.data) {
-        setEnrollments(enrollRes.data);
-        writeCache(ENROLLMENTS_KEY, enrollRes.data);
-      }
-
-      if (!cachedUser) setLoading(false);
-    });
+      });
   }, [router]);
 
   async function logout() {

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { PanelLeftClose, PanelLeft, LogOut } from "lucide-react";
 
@@ -27,6 +28,7 @@ interface Stats {
 
 export default function AdminShell({ children, user }: AdminShellProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [badges, setBadges] = useState<Stats>({
     pendingEnrollments: 0,
@@ -47,11 +49,6 @@ export default function AdminShell({ children, user }: AdminShellProps) {
   function isActive(href: string, exact: boolean) {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
-  }
-
-  async function handleLogout() {
-    await api.post("/auth/logout", {});
-    window.location.href = "/login";
   }
 
   return (
@@ -152,7 +149,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
             </p>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="flex items-center h-12 w-full hover:bg-destructive/10 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 group/logout btn-press"
           >
             <div className="w-[64px] shrink-0 flex items-center justify-center">
