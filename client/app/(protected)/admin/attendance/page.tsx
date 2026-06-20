@@ -11,8 +11,8 @@ import { ArrowRight } from "lucide-react";
 
 interface AttendanceRow {
   enrollmentId: string;
-  student: { _id: string; name: string; email: string };
-  course: { _id: string; title: string };
+  student: { _id: string; name: string; email: string } | null;
+  course: { _id: string; title: string } | null;
   attendancePercent: number;
   attendedCount: number;
   totalSessions: number;
@@ -73,8 +73,8 @@ export default function AttendancePage() {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      (r.student as { name: string }).name.toLowerCase().includes(q) ||
-      (r.student as { email: string }).email.toLowerCase().includes(q)
+      r.student?.name?.toLowerCase().includes(q) ||
+      r.student?.email?.toLowerCase().includes(q)
     );
   });
 
@@ -163,8 +163,8 @@ export default function AttendancePage() {
               </div>
 
               {filtered.map((row) => {
-                const s = row.student as { name: string; email: string };
-                const c = row.course as { _id: string; title: string };
+                const s = row.student;
+                const c = row.course;
                 const pct = row.attendancePercent;
                 const barColor = pct >= 80 ? "#1d4ed8" : pct >= 50 ? "#d97706" : "#dc2626";
 
@@ -175,13 +175,13 @@ export default function AttendancePage() {
                     style={{ gridTemplateColumns: "1fr 1fr 7rem 8rem" }}
                   >
                     <div className="pr-3 min-w-0">
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{s.name}</p>
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{s.email}</p>
+                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{s?.name ?? "—"}</p>
+                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{s?.email ?? ""}</p>
                     </div>
                     <div className="pr-3 min-w-0">
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{c.title}</p>
+                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{c?.title ?? "—"}</p>
                       <Link
-                        href={`/admin/courses/${c._id}/roster`}
+                        href={`/admin/courses/${c?._id ?? ""}/roster`}
                         className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-primary hover:opacity-80 transition-opacity inline-flex items-center gap-0.5"
                       >
                         View roster <ArrowRight className="w-2.5 h-2.5" />

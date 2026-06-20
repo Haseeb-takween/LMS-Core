@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface Enrollment {
   _id: string;
-  studentId: { _id: string; name: string; email: string };
-  courseId:  { _id: string; title: string; schedule: string };
+  studentId: { _id: string; name: string; email: string } | null;
+  courseId:  { _id: string; title: string; schedule: string } | null;
   status: "pending" | "approved" | "rejected";
   requestedAt: string;
 }
@@ -105,10 +105,10 @@ export default function EnrollmentTable({ initialEnrollments, initialFilter }: E
                   }}
                 >
                   <div className="pr-3 min-w-0">
-                    <p className="text-xs text-foreground truncate font-semibold">{enr.studentId.name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{enr.studentId.email}</p>
+                    <p className="text-xs text-foreground truncate font-semibold">{enr.studentId?.name ?? "—"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{enr.studentId?.email ?? ""}</p>
                   </div>
-                  <p className="text-xs text-foreground truncate pr-3 font-medium">{enr.courseId.title}</p>
+                  <p className="text-xs text-foreground truncate pr-3 font-medium">{enr.courseId?.title ?? "—"}</p>
                   <p className="text-xs text-muted-foreground font-medium">
                     {new Date(enr.requestedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
                   </p>

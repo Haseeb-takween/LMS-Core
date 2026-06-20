@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface Certificate {
   _id: string;
-  studentId: { _id: string; name: string; email: string };
-  courseId: { _id: string; title: string; schedule: string };
+  studentId: { _id: string; name: string; email: string } | null;
+  courseId: { _id: string; title: string; schedule: string } | null;
   status: "pending_approval" | "approved" | "rejected";
   attendancePercent: number;
   quizAverage: number;
@@ -132,10 +132,10 @@ export default function CertificateTable({ initialCertificates }: CertificateTab
                     style={{ gridTemplateColumns: "1fr 1fr 5rem 5rem 6rem 9rem" }}
                   >
                     <div className="pr-3 min-w-0">
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{cert.studentId.name}</p>
-                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{cert.studentId.email}</p>
+                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{cert.studentId?.name ?? "—"}</p>
+                      <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{cert.studentId?.email ?? ""}</p>
                     </div>
-                    <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate pr-3">{cert.courseId.title}</p>
+                    <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate pr-3">{cert.courseId?.title ?? "—"}</p>
                     <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px]"
                       style={{ color: cert.attendancePercent >= 80 ? "#1d4ed8" : "#d97706" }}>
                       {cert.attendancePercent}%

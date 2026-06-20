@@ -25,9 +25,9 @@ interface EnrichedAnswer {
 
 interface QuizResult {
   _id: string;
-  student: { _id: string; name: string; email: string };
-  course: { _id: string; title: string };
-  session: { _id: string; lessonNumber: number; title: string };
+  student: { _id: string; name: string; email: string } | null;
+  course: { _id: string; title: string } | null;
+  session: { _id: string; lessonNumber: number; title: string } | null;
   mcScore: number;
   mcTotal: number;
   submittedAt: string;
@@ -152,8 +152,8 @@ export default function QuizResultsPage() {
 
                 {results.map((r) => {
                   const isOpen = expanded === r._id;
-                  const student = r.student as { name: string; email: string };
-                  const session = r.session as { lessonNumber: number; title: string };
+                  const student = r.student;
+                  const session = r.session;
                   const mcPct = r.mcTotal > 0 ? Math.round((r.mcScore / r.mcTotal) * 100) : null;
 
                   return (
@@ -164,12 +164,12 @@ export default function QuizResultsPage() {
                         onClick={() => setExpanded(isOpen ? null : r._id)}
                       >
                         <div className="pr-3 min-w-0">
-                          <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{student.name}</p>
-                          <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{student.email}</p>
+                          <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{student?.name ?? "—"}</p>
+                          <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] text-muted-foreground truncate">{student?.email ?? ""}</p>
                         </div>
                         <div className="pr-3 min-w-0">
                           <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">
-                            L{session.lessonNumber} — {session.title}
+                            {session ? `L${session.lessonNumber} — ${session.title}` : "—"}
                           </p>
                         </div>
                         <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-muted-foreground">
