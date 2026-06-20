@@ -56,35 +56,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
 
-    api.get<AuthUser>("/auth/me")
-      .then(async (authRes) => {
-        if (!authRes.success || !authRes.data) {
-          writeCache(USER_KEY, null);
-          writeCache(ENROLLMENTS_KEY, null);
-          router.replace("/login");
+    let retried = false;
+
+    async function attemptAuth() {
+      const authRes = await api.get<AuthUser>("/auth/me");
+
+      if (!authRes.success || !authRes.data) {
+        const isTransient = authRes.message === "Network error" || authRes.message === "Server error";
+        if (isTransient && !retried) {
+          retried = true;
+          setTimeout(attemptAuth, 3000);
           return;
         }
-
-        const freshUser = authRes.data;
-        setUser(freshUser);
-        writeCache(USER_KEY, freshUser);
-
-        if (freshUser.role === "user") {
-          const enrollRes = await api.get<Enrollment[]>("/enrollments/my").catch(() => null);
-          if (enrollRes?.success && enrollRes.data) {
-            setEnrollments(enrollRes.data);
-            writeCache(ENROLLMENTS_KEY, enrollRes.data);
-          }
-        }
-
-        if (!cachedUser) setLoading(false);
-      })
-      .catch(() => {
         writeCache(USER_KEY, null);
         writeCache(ENROLLMENTS_KEY, null);
         if (!cachedUser) setLoading(false);
-        router.replace("/login");
-      });
+        router.replace("/login?reason=expired");
+        return;
+      }
+
+      const freshUser = authRes.data;
+      setUser(freshUser);
+      writeCache(USER_KEY, freshUser);
+
+      if (freshUser.role === "user") {
+        const enrollRes = await api.get<Enrollment[]>("/enrollments/my");
+        if (enrollRes.success && enrollRes.data) {
+          setEnrollments(enrollRes.data);
+          writeCache(ENROLLMENTS_KEY, enrollRes.data);
+        }
+      }
+
+      if (!cachedUser) setLoading(false);
+    }
+
+    attemptAuth();
   }, [router]);
 
   async function logout() {

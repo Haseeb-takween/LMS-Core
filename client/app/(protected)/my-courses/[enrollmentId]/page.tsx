@@ -68,11 +68,16 @@ export default function MyCourseDetailPage() {
   const { enrollment, sessions, attendancePercent } = data;
   const course = enrollment.courseId as Course;
 
+  const quizzableSessions = sessions.filter((s) => s.quizScore !== undefined);
+  const completedQuizzes = sessions.filter((s) => s.quizScore !== null && s.quizScore !== undefined).length;
+  const totalQuizzable = quizzableSessions.length;
+  const allQuizzesDone = totalQuizzable === 0 || completedQuizzes === totalQuizzable;
+
   const quizScores = sessions
     .filter((s) => s.quizScore && s.quizScore.mcTotal > 0)
     .map((s) => Math.round((s.quizScore!.mcScore / s.quizScore!.mcTotal) * 100));
   const quizAvg =
-    quizScores.length > 0
+    allQuizzesDone && quizScores.length > 0
       ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length)
       : null;
 
@@ -130,6 +135,14 @@ export default function MyCourseDetailPage() {
                 </span>
               </div>
               <AnimatedBar percent={quizAvg ?? 0} color="#4f8ef7" height="5px" />
+              {totalQuizzable > 0 && (
+                <p className="text-xs text-muted-foreground mt-2 font-medium">
+                  {completedQuizzes}/{totalQuizzable} quizzes submitted
+                  {!allQuizzesDone && (
+                    <span className="ml-1" style={{ color: "#d97706" }}>— complete all to qualify</span>
+                  )}
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -168,9 +181,11 @@ export default function MyCourseDetailPage() {
                 sessions.map((s, i) => {
                   const att = statusLabel(s);
                   const quizScore = s.quizScore;
+                  const hasQuiz = quizScore !== undefined;
+                  const quizDone = hasQuiz && quizScore !== null;
                   const quizPct =
-                    quizScore && quizScore.mcTotal > 0
-                      ? Math.round((quizScore.mcScore / quizScore.mcTotal) * 100)
+                    quizDone && quizScore!.mcTotal > 0
+                      ? Math.round((quizScore!.mcScore / quizScore!.mcTotal) * 100)
                       : null;
 
                   return (
@@ -192,9 +207,13 @@ export default function MyCourseDetailPage() {
                       >
                         {att.text}
                       </span>
-                      <span className="text-sm font-bold" style={{ color: quizPct !== null ? undefined : "#6b6b80" }}>
-                        {quizPct !== null ? `${quizPct}%` : "—"}
-                      </span>
+                      {!hasQuiz ? (
+                        <span className="text-sm font-bold" style={{ color: "#6b6b80" }}>—</span>
+                      ) : !quizDone ? (
+                        <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "#d97706" }}>Pending</span>
+                      ) : (
+                        <span className="text-sm font-bold">{quizPct !== null ? `${quizPct}%` : "Done"}</span>
+                      )}
                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/row:text-primary group-hover/row:translate-x-0.5 transition-[transform,box-shadow,border-color,opacity,background-color,color] duration-200 ml-auto" />
                     </Link>
                   );

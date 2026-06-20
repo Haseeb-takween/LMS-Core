@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api, type Question, type SubmittedAnswer } from "@/lib/api";
+import { api, type Question } from "@/lib/api";
 
 interface QuizFormProps {
   enrollmentId: string;
   sessionId: string;
   questions: Question[];
+  onSubmitSuccess: () => void;
 }
 
-export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFormProps) {
-  const router = useRouter();
+export default function QuizForm({ enrollmentId, sessionId, questions, onSubmitSuccess }: QuizFormProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +41,7 @@ export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFor
         { answers: payload }
       );
       if (res.success) {
-        router.refresh();
+        onSubmitSuccess();
       } else {
         setError(res.message || "Submission failed.");
       }
@@ -57,7 +56,6 @@ export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFor
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {questions.map((q, i) => (
         <div key={q._id} className="border border-[#1e1e2e] p-5">
-          {/* Question header */}
           <div className="flex items-start gap-3 mb-4">
             <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-[#6b6b80] shrink-0 mt-0.5">
               Q{i + 1}
@@ -72,10 +70,7 @@ export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFor
               {q.options.map((opt, oi) => {
                 const selected = answers[q._id] === opt;
                 return (
-                  <label
-                    key={oi}
-                    className="flex items-center gap-3 cursor-pointer group"
-                  >
+                  <label key={oi} className="flex items-center gap-3 cursor-pointer group">
                     <span
                       className="w-4 h-4 border shrink-0 flex items-center justify-center transition-colors duration-150"
                       style={{
@@ -83,9 +78,7 @@ export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFor
                         background: selected ? "rgba(29,78,216,0.12)" : "transparent",
                       }}
                     >
-                      {selected && (
-                        <span className="w-1.5 h-1.5 bg-[#1d4ed8]" />
-                      )}
+                      {selected && <span className="w-1.5 h-1.5 bg-[#1d4ed8]" />}
                     </span>
                     <input
                       type="radio"
@@ -122,11 +115,7 @@ export default function QuizForm({ enrollmentId, sessionId, questions }: QuizFor
       {error && (
         <div
           className="font-[family-name:var(--font-ibm-plex-mono)] text-xs px-3 py-2"
-          style={{
-            color: "#dc2626",
-            background: "rgba(220,38,38,0.07)",
-            borderLeft: "2px solid #dc2626",
-          }}
+          style={{ color: "#dc2626", background: "rgba(220,38,38,0.07)", borderLeft: "2px solid #dc2626" }}
         >
           {error}
         </div>

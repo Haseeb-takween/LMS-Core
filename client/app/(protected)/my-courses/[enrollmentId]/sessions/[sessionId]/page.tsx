@@ -200,6 +200,11 @@ export default function SessionDetailPage() {
                 enrollmentId={enrollmentId}
                 sessionId={sessionId}
                 questions={questions}
+                onSubmitSuccess={() => {
+                  api.get<SessionDetail>(`/enrollments/${enrollmentId}/sessions/${sessionId}`).then((res) => {
+                    if (res.success && res.data) setSession(res.data);
+                  });
+                }}
               />
             )}
           </div>

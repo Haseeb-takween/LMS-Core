@@ -86,15 +86,24 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const res = await fetch(`${API_URL}/api/v1${path}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-  return res.json() as Promise<ApiResponse<T>>;
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/v1${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    return { success: false, message: "Network error" };
+  }
+  try {
+    return await res.json() as ApiResponse<T>;
+  } catch {
+    return { success: false, message: res.status >= 500 ? "Server error" : "Invalid response" };
+  }
 }
 
 export const api = {
