@@ -138,6 +138,11 @@ export async function adminGetAttendance(
     if (sortBy === "attendancePercent") {
       return (a.attendancePercent - b.attendancePercent) * dir;
     }
+    if (sortBy === "enrolledAt") {
+      const dateA = new Date(a.enrolledAt).getTime();
+      const dateB = new Date(b.enrolledAt).getTime();
+      return (dateA - dateB) * dir;
+    }
     const nameA =
       typeof a.student === "object" && a.student !== null && "name" in a.student
         ? String((a.student as { name: string }).name)

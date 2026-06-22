@@ -16,6 +16,7 @@ interface AttendanceRow {
   attendancePercent: number;
   attendedCount: number;
   totalSessions: number;
+  enrolledAt: string | Date;
 }
 
 interface Course {
@@ -23,7 +24,7 @@ interface Course {
   title: string;
 }
 
-type SortKey = "name" | "attendancePercent";
+type SortKey = "name" | "attendancePercent" | "enrolledAt";
 type SortDir = "asc" | "desc";
 
 export default function AttendancePage() {
@@ -137,7 +138,7 @@ export default function AttendancePage() {
             <CardContent className="p-0">
               {/* Header */}
               <div className="grid bg-secondary/30 border-b border-border px-5 py-3"
-                style={{ gridTemplateColumns: "1fr 1fr 7rem 8rem" }}>
+                style={{ gridTemplateColumns: "1fr 1fr 7rem 7rem 8rem" }}>
                 <button
                   onClick={() => toggleSort("name")}
                   className={`font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase text-left flex items-center gap-1 hover:text-foreground transition-colors ${
@@ -149,6 +150,14 @@ export default function AttendancePage() {
                 <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase text-muted-foreground">
                   Course
                 </span>
+                <button
+                  onClick={() => toggleSort("enrolledAt")}
+                  className={`font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase text-left flex items-center gap-1 hover:text-foreground transition-colors ${
+                    sortBy === "enrolledAt" ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  Enrolled {sortBy === "enrolledAt" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+                </button>
                 <span className="font-[family-name:var(--font-ibm-plex-mono)] text-[9px] tracking-widest uppercase text-muted-foreground">
                   Sessions
                 </span>
@@ -167,12 +176,17 @@ export default function AttendancePage() {
                 const c = row.course;
                 const pct = row.attendancePercent;
                 const barColor = pct >= 80 ? "#1d4ed8" : pct >= 50 ? "#d97706" : "#dc2626";
+                const enrolledDate = new Date(row.enrolledAt).toLocaleDateString("en-US", {
+                  year: "2-digit",
+                  month: "short",
+                  day: "numeric",
+                });
 
                 return (
                   <div
                     key={String(row.enrollmentId)}
                     className="grid items-center px-5 py-4 border-b border-border last:border-0 hover:bg-secondary/20 transition-colors"
-                    style={{ gridTemplateColumns: "1fr 1fr 7rem 8rem" }}
+                    style={{ gridTemplateColumns: "1fr 1fr 7rem 7rem 8rem" }}
                   >
                     <div className="pr-3 min-w-0">
                       <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-foreground truncate">{s?.name ?? "—"}</p>
@@ -187,6 +201,9 @@ export default function AttendancePage() {
                         View roster <ArrowRight className="w-2.5 h-2.5" />
                       </Link>
                     </div>
+                    <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-muted-foreground">
+                      {enrolledDate}
+                    </p>
                     <p className="font-[family-name:var(--font-ibm-plex-mono)] text-[10px] text-muted-foreground">
                       {row.attendedCount}/{row.totalSessions}
                     </p>
